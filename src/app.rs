@@ -85,11 +85,11 @@ impl App {
             return;
         }
         
-        // Use nucleo for fuzzy matching
+        // Use nucleo for matching
         let matcher = nucleo::pattern::Pattern::new(
             query, 
             nucleo::pattern::CaseMatching::Smart, 
-            nucleo::pattern::AtomKind::Fuzzy
+            nucleo::pattern::AtomKind::Exact
         );
         
         self.filtered_indices = self.items
