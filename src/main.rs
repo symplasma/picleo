@@ -4,7 +4,6 @@ mod ui;
 use std::io::{self, BufRead};
 use std::path::PathBuf;
 use std::fs;
-use std::time::Duration;
 
 use anyhow::{Result, Context};
 use clap::Parser;
@@ -76,7 +75,7 @@ fn main() -> Result<()> {
 
     if let Err(err) = res {
         println!("{err:?}");
-        return Err(err);
+        return Err(anyhow::anyhow!("{:?}", err));
     }
 
     Ok(())

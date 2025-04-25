@@ -86,7 +86,11 @@ impl App {
         }
         
         // Use nucleo for fuzzy matching
-        let matcher = nucleo::pattern::Pattern::new(query).unwrap();
+        let matcher = nucleo::pattern::Pattern::new(
+            query, 
+            nucleo::pattern::CaseMatching::Smart, 
+            nucleo::pattern::AtomKind::Fuzzy
+        );
         
         self.filtered_indices = self.items
             .iter()

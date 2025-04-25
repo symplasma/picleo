@@ -2,14 +2,14 @@ use ratatui::{
     backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
-    text::{Span, Spans},
+    text::{Span, Line},
     widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame,
 };
 
 use crate::app::App;
 
-pub fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
+pub fn ui(f: &mut Frame, app: &mut App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(2)
@@ -28,8 +28,8 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     render_items(f, app, chunks[2]);
 }
 
-fn render_help<B: Backend>(f: &mut Frame<B>, area: Rect) {
-    let text = vec![Spans::from(vec![
+fn render_help(f: &mut Frame, area: Rect) {
+    let text = vec![Line::from(vec![
         Span::raw("Press "),
         Span::styled("↑/↓", Style::default().add_modifier(Modifier::BOLD)),
         Span::raw(" to navigate, "),
@@ -45,14 +45,14 @@ fn render_help<B: Backend>(f: &mut Frame<B>, area: Rect) {
     f.render_widget(paragraph, area);
 }
 
-fn render_search_input<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
-    let input = Paragraph::new(app.query.as_ref())
+fn render_search_input(f: &mut Frame, app: &App, area: Rect) {
+    let input = Paragraph::new(app.query.as_str())
         .style(Style::default())
         .block(Block::default().borders(Borders::ALL).title("Search"));
     f.render_widget(input, area);
 }
 
-fn render_items<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
+fn render_items(f: &mut Frame, app: &App, area: Rect) {
     let items: Vec<ListItem> = app
         .items
         .iter()
