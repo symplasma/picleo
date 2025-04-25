@@ -25,18 +25,21 @@ impl App {
         if self.items.is_empty() {
             return;
         }
-        
+
         let indices = if self.filtered_indices.is_empty() {
             (0..self.items.len()).collect::<Vec<_>>()
         } else {
             self.filtered_indices.clone()
         };
-        
+
         if indices.is_empty() {
             return;
         }
-        
-        let current_pos = indices.iter().position(|&i| i == self.current_index).unwrap_or(0);
+
+        let current_pos = indices
+            .iter()
+            .position(|&i| i == self.current_index)
+            .unwrap_or(0);
         let next_pos = (current_pos + 1) % indices.len();
         self.current_index = indices[next_pos];
     }
@@ -45,18 +48,21 @@ impl App {
         if self.items.is_empty() {
             return;
         }
-        
+
         let indices = if self.filtered_indices.is_empty() {
             (0..self.items.len()).collect::<Vec<_>>()
         } else {
             self.filtered_indices.clone()
         };
-        
+
         if indices.is_empty() {
             return;
         }
-        
-        let current_pos = indices.iter().position(|&i| i == self.current_index).unwrap_or(0);
+
+        let current_pos = indices
+            .iter()
+            .position(|&i| i == self.current_index)
+            .unwrap_or(0);
         let previous_pos = if current_pos == 0 {
             indices.len() - 1
         } else {
@@ -69,7 +75,7 @@ impl App {
         if self.items.is_empty() {
             return;
         }
-        
+
         if let Some(pos) = self.selected.iter().position(|&i| i == self.current_index) {
             self.selected.remove(pos);
         } else {
@@ -79,27 +85,26 @@ impl App {
 
     pub fn update_search(&mut self, query: &str) {
         self.query = query.to_string();
-        
+
         if query.is_empty() {
             self.filtered_indices.clear();
             return;
         }
-        
+
         // Use nucleo for matching
         let matcher = nucleo::pattern::Pattern::new(
-            query, 
-            nucleo::pattern::CaseMatching::Smart, 
-            nucleo::pattern::AtomKind::Exact
+            query,
+            nucleo::pattern::CaseMatching::Smart,
+            nucleo::pattern::AtomKind::Exact,
         );
-        
-        self.filtered_indices = self.items
+
+        self.filtered_indices = self
+            .items
             .iter()
             .enumerate()
-            .filter_map(|(idx, item)| {
-                matcher.fuzzy_match(item).map(|_| idx)
-            })
+            .filter_map(|(idx, item)| matcher.fuzzy_match(item).map(|_| idx))
             .collect();
-        
+
         // Reset current index to first match if we have matches
         if !self.filtered_indices.is_empty() {
             self.current_index = self.filtered_indices[0];

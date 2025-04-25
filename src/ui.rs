@@ -2,7 +2,7 @@ use ratatui::{
     backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
-    text::{Span, Line},
+    text::{Line, Span},
     widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame,
 };
@@ -60,14 +60,16 @@ fn render_items(f: &mut Frame, app: &App, area: Rect) {
         .map(|(i, item)| {
             let is_selected = app.selected.contains(&i);
             let style = if is_selected {
-                Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD)
             } else {
                 Style::default()
             };
-            
+
             let prefix = if is_selected { "✓ " } else { "  " };
             let content = format!("{}{}", prefix, item);
-            
+
             ListItem::new(content).style(style)
         })
         .collect();
@@ -86,12 +88,19 @@ fn render_items(f: &mut Frame, app: &App, area: Rect) {
     } else {
         app.filtered_indices.clone()
     };
-    
+
     let selected_index = if !indices.is_empty() {
-        indices.iter().position(|&i| i == app.current_index).unwrap_or(0)
+        indices
+            .iter()
+            .position(|&i| i == app.current_index)
+            .unwrap_or(0)
     } else {
         0
     };
 
-    f.render_stateful_widget(items, area, &mut ratatui::widgets::ListState::default().with_selected(Some(selected_index)));
+    f.render_stateful_widget(
+        items,
+        area,
+        &mut ratatui::widgets::ListState::default().with_selected(Some(selected_index)),
+    );
 }

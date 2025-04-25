@@ -1,11 +1,11 @@
 mod app;
 mod ui;
 
+use std::fs;
 use std::io::{self, BufRead};
 use std::path::PathBuf;
-use std::fs;
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use clap::Parser;
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},
@@ -27,7 +27,7 @@ struct Args {
 
 fn main() -> Result<()> {
     let args = Args::parse();
-    
+
     // Setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -37,14 +37,14 @@ fn main() -> Result<()> {
 
     // Create app state
     let mut app = App::new();
-    
+
     // Load items
     if !args.dirs.is_empty() {
         // List files from directories
         for dir in args.dirs {
             let entries = fs::read_dir(&dir)
                 .with_context(|| format!("Failed to read directory: {}", dir.display()))?;
-            
+
             for entry in entries {
                 if let Ok(entry) = entry {
                     app.items.push(entry.path().display().to_string());
