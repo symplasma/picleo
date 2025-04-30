@@ -1,6 +1,6 @@
 use std::{error, sync::Arc};
 
-use nucleo::{Config, Injector, Nucleo, Snapshot};
+use nucleo::{pattern::CaseMatching, Config, Injector, Nucleo, Snapshot};
 
 use crate::selectable::Selectable;
 
@@ -167,12 +167,16 @@ impl App {
     }
 
     pub(crate) fn append_to_query(&mut self, key: char) {
-        self.matcher.tick(10);
         self.query.push(key);
+        self.matcher
+            .pattern
+            .reparse(0, &self.query, CaseMatching::Smart, true);
     }
 
     pub(crate) fn delete_from_query(&mut self) {
-        self.matcher.tick(10);
         self.query.pop();
+        self.matcher
+            .pattern
+            .reparse(0, &self.query, CaseMatching::Smart, false);
     }
 }
