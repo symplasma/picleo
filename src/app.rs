@@ -84,23 +84,6 @@ impl App {
             return;
         }
 
-        // let indices: Vec<usize> = if self.filtered_indices.is_empty() {
-        //     (0..self.items.len()).collect::<Vec<_>>()
-        // } else {
-        //     self.filtered_indices.clone()
-        // };
-
-        // if indices.is_empty() {
-        //     return;
-        // }
-
-        // let current_pos: usize = indices
-        //     .iter()
-        //     .position(|&i| i == self.current_index)
-        //     .unwrap_or(0);
-        // let next_pos = (current_pos + 1) % indices.len();
-        // self.current_index = indices[next_pos];
-
         self.current_index = (self.current_index + 1) % indices;
     }
 
@@ -110,27 +93,6 @@ impl App {
         if self.snapshot().matched_item_count() == 0 {
             return;
         }
-
-        // let indices: Vec<usize> = if self.filtered_indices.is_empty() {
-        //     (0..self.items.len()).collect::<Vec<_>>()
-        // } else {
-        //     self.filtered_indices.clone()
-        // };
-
-        // if indices.is_empty() {
-        //     return;
-        // }
-
-        // let current_pos: usize = indices
-        //     .iter()
-        //     .position(|&i| i == self.current_index)
-        //     .unwrap_or(0);
-        // let previous_pos = if current_pos == 0 {
-        //     indices.len() - 1
-        // } else {
-        //     current_pos - 1
-        // };
-        // self.current_index = indices[previous_pos];
 
         self.current_index = if self.current_index == 0 {
             indices - 1
@@ -150,21 +112,10 @@ impl App {
         snapshot.get_matched_item(self.current_index).map(|i| {
             i.data.toggle_selected();
         });
-
-        // if let Some(pos) = self.selected.iter().position(|&i| i == self.current_index) {
-        //     self.selected.remove(pos);
-        // } else {
-        //     self.selected.push(self.current_index);
-        // }
     }
 
     pub fn update_search(&mut self, query: &str) {
         self.query = query.to_string();
-
-        // if query.is_empty() {
-        //     self.filtered_indices.clear();
-        //     return;
-        // }
 
         // Use nucleo for matching
         let matcher = nucleo::pattern::Pattern::new(
@@ -172,18 +123,6 @@ impl App {
             nucleo::pattern::CaseMatching::Smart,
             nucleo::pattern::AtomKind::Exact,
         );
-
-        // self.filtered_indices = self
-        //     .items
-        //     .iter()
-        //     .enumerate()
-        //     .filter_map(|(idx, item)| matcher.fuzzy_match(item).map(|_| idx))
-        //     .collect();
-
-        // // Reset current index to first match if we have matches
-        // if !self.filtered_indices.is_empty() {
-        //     self.current_index = self.filtered_indices[0];
-        // }
     }
 
     pub(crate) fn append_to_query(&mut self, key: char) {
