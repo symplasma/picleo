@@ -80,9 +80,13 @@ impl App {
         //     .unwrap_or(0);
         // let next_pos = (current_pos + 1) % indices.len();
         // self.current_index = indices[next_pos];
+
+        self.current_index = (self.current_index + 1) % indices;
     }
 
     pub fn previous(&mut self) {
+        let indices = self.snapshot().matched_item_count();
+
         if self.snapshot().matched_item_count() == 0 {
             return;
         }
@@ -107,6 +111,12 @@ impl App {
         //     current_pos - 1
         // };
         // self.current_index = indices[previous_pos];
+
+        self.current_index = if self.current_index == 0 {
+            indices - 1
+        } else {
+            self.current_index.saturating_sub(1)
+        };
     }
 
     pub fn toggle_selected(&mut self) {

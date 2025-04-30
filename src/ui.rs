@@ -81,25 +81,9 @@ fn render_items(f: &mut Frame, app: &App, area: Rect) {
         )
         .highlight_symbol("> ");
 
-    // let indices = if app.filtered_indices.is_empty() {
-    //     (0..app.items.len()).collect::<Vec<_>>()
-    // } else {
-    //     app.filtered_indices.clone()
-    // };
-
-    let selected_index = 0;
-    // let selected_index = if !indices.is_empty() {
-    //     indices
-    //         .iter()
-    //         .position(|&i| i == app.current_index)
-    //         .unwrap_or(0)
-    // } else {
-    //     0
-    // };
-
     f.render_stateful_widget(
         items,
         area,
-        &mut ratatui::widgets::ListState::default().with_selected(Some(selected_index)),
+        &mut ratatui::widgets::ListState::default().with_selected(Some(app.current_index as usize)),
     );
 }

@@ -65,7 +65,6 @@ fn main() -> Result<()> {
     }
 
     // Run app
-    app.tick(10);
     let res = run_app(&mut terminal, app);
 
     // Restore terminal
@@ -90,6 +89,7 @@ fn run_app<B: ratatui::backend::Backend>(
     mut app: App,
 ) -> AppResult<()> {
     loop {
+        app.tick(10);
         terminal.draw(|f| ui(f, &mut app))?;
 
         if let Ok(Event::Key(key)) = event::read() {
