@@ -76,11 +76,16 @@ fn main() -> Result<()> {
     )?;
     terminal.show_cursor()?;
 
-    // TODO print selected results here
-
-    if let Err(err) = res {
-        println!("{err:?}");
-        return Err(anyhow::anyhow!("{:?}", err));
+    match res {
+        Ok(lines) => {
+            for line in lines {
+                println!("{}", line)
+            }
+        }
+        Err(err) => {
+            println!("{err:?}");
+            return Err(anyhow::anyhow!("{:?}", err));
+        }
     }
 
     Ok(())
@@ -89,7 +94,7 @@ fn main() -> Result<()> {
 fn run_app<B: ratatui::backend::Backend>(
     terminal: &mut Terminal<B>,
     mut app: App,
-) -> AppResult<()> {
+) -> AppResult<Vec<String>> {
     loop {
         app.tick(10);
         terminal.draw(|f| ui(f, &mut app))?;
@@ -103,17 +108,18 @@ fn run_app<B: ratatui::backend::Backend>(
                     app.delete_from_query();
                 }
                 (KeyCode::Esc, KeyModifiers::NONE) => {
-                    return Ok(());
+                    return Ok(vec![]);
                 }
                 (KeyCode::Char('c'), KeyModifiers::CONTROL) => {
-                    return Ok(());
+                    return Ok(vec![]);
                 }
                 (KeyCode::Enter, KeyModifiers::NONE) => {
                     // Print selected items and exit
-                    for item in app.selected_items().iter() {
-                        println!("{}", item);
-                    }
-                    return Ok(());
+                    return Ok(app
+                        .selected_items()
+                        .iter()
+                        .map(|i| i.to_owned().clone())
+                        .collect());
                 }
                 (KeyCode::Down, KeyModifiers::NONE) => {
                     app.next();
