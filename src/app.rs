@@ -167,6 +167,7 @@ impl App {
     }
 
     pub(crate) fn append_to_query(&mut self, key: char) {
+        // TODO constrain selected item to match range
         self.query.push(key);
         self.matcher
             .pattern

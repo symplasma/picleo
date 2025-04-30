@@ -76,6 +76,8 @@ fn main() -> Result<()> {
     )?;
     terminal.show_cursor()?;
 
+    // TODO print selected results here
+
     if let Err(err) = res {
         println!("{err:?}");
         return Err(anyhow::anyhow!("{:?}", err));
