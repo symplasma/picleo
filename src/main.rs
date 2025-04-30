@@ -10,7 +10,7 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use crossterm::event::KeyModifiers;
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -38,7 +38,7 @@ fn main() -> Result<()> {
     let mut terminal = Terminal::new(backend)?;
 
     // Create app state
-    let mut app = App::new();
+    let app = App::new();
 
     // TODO wrap item loading in a spawned thread so we don't block the UI
     // Load items
@@ -115,11 +115,7 @@ fn run_app<B: ratatui::backend::Backend>(
                 }
                 (KeyCode::Enter, KeyModifiers::NONE) => {
                     // Print selected items and exit
-                    return Ok(app
-                        .selected_items()
-                        .iter()
-                        .map(|i| i.to_owned().clone())
-                        .collect());
+                    return Ok(app.lines_to_print());
                 }
                 (KeyCode::Down, KeyModifiers::NONE) => {
                     app.next();

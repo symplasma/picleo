@@ -58,6 +58,26 @@ impl App {
             .collect()
     }
 
+    pub(crate) fn lines_to_print(&self) -> Vec<String> {
+        // NOTE: matched_items is not factored out due to ownership issues
+        let selected_items: Vec<String> = self
+            .snapshot()
+            .matched_items(..)
+            .filter(|i| i.data.is_selected())
+            .map(|i| i.data.value().to_owned().clone())
+            .collect();
+
+        if selected_items.len() > 0 {
+            selected_items
+        } else {
+            self.snapshot()
+                .matched_items(..)
+                .nth(self.current_index as usize)
+                .map(|i| vec![i.data.value().to_owned()])
+                .unwrap_or(vec![String::new()])
+        }
+    }
+
     pub fn next(&mut self) {
         let indices = self.snapshot().matched_item_count();
         if indices == 0 {
