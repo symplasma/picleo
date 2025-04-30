@@ -38,6 +38,10 @@ impl App {
         });
     }
 
+    pub fn tick(&mut self, timeout: u64) {
+        self.matcher.tick(timeout);
+    }
+
     pub fn snapshot(&self) -> &Snapshot<Selectable<String>> {
         self.matcher.snapshot()
     }
@@ -153,10 +157,12 @@ impl App {
     }
 
     pub(crate) fn append_to_query(&mut self, key: char) {
+        self.matcher.tick(10);
         self.query.push(key);
     }
 
     pub(crate) fn delete_from_query(&mut self) {
+        self.matcher.tick(10);
         self.query.pop();
     }
 }

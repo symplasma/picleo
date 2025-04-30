@@ -38,7 +38,7 @@ fn main() -> Result<()> {
     let mut terminal = Terminal::new(backend)?;
 
     // Create app state
-    let app = App::new();
+    let mut app = App::new();
 
     // TODO wrap item loading in a spawned thread so we don't block the UI
     // Load items
@@ -65,6 +65,7 @@ fn main() -> Result<()> {
     }
 
     // Run app
+    app.tick(10);
     let res = run_app(&mut terminal, app);
 
     // Restore terminal
