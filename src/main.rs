@@ -8,6 +8,7 @@ use std::path::PathBuf;
 
 use anyhow::{Context, Result};
 use clap::Parser;
+use crossterm::event::KeyModifiers;
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},
     execute,
@@ -90,37 +91,40 @@ fn run_app<B: ratatui::backend::Backend>(
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
 
-        if let Event::Key(key) = event::read()? {
-            if key.kind == KeyEventKind::Press {
-                match key.code {
-                    KeyCode::Char(key) => {
-                        app.append_to_query(key);
-                    }
-                    KeyCode::Backspace => {
-                        app.delete_from_query();
-                    }
-                    KeyCode::Esc => {
-                        return Ok(());
-                    }
-                    KeyCode::Enter => {
-                        // Print selected items and exit
-                        for item in app.selected_items().iter() {
-                            println!("{}", item);
-                        }
-                        return Ok(());
-                    }
-                    KeyCode::Down => {
-                        app.next();
-                    }
-                    KeyCode::Up => {
-                        app.previous();
-                    }
-                    KeyCode::Tab => {
-                        app.toggle_selected();
-                    }
-                    _ => {}
+        if let Ok(Event::Key(key)) = event::read() {
+            match (key.code, key.modifiers) {
+                (KeyCode::Char(key), KeyModifiers::NONE) => {
+                    app.append_to_query(key);
                 }
+                (KeyCode::Backspace, KeyModifiers::NONE) => {
+                    app.delete_from_query();
+                }
+                (KeyCode::Esc, KeyModifiers::NONE) => {
+                    return Ok(());
+                }
+                (KeyCode::Char('c'), KeyModifiers::CONTROL) => {
+                    return Ok(());
+                }
+                (KeyCode::Enter, KeyModifiers::NONE) => {
+                    // Print selected items and exit
+                    for item in app.selected_items().iter() {
+                        println!("{}", item);
+                    }
+                    return Ok(());
+                }
+                (KeyCode::Down, KeyModifiers::NONE) => {
+                    app.next();
+                }
+                (KeyCode::Up, KeyModifiers::NONE) => {
+                    app.previous();
+                }
+                (KeyCode::Tab, KeyModifiers::NONE) => {
+                    app.toggle_selected();
+                }
+
+                // ignore other key codes
+                _ => {}
             }
-        }
+        };
     }
 }
