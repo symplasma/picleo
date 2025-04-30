@@ -1,5 +1,4 @@
 use ratatui::{
-    backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
@@ -54,11 +53,10 @@ fn render_search_input(f: &mut Frame, app: &App, area: Rect) {
 
 fn render_items(f: &mut Frame, app: &App, area: Rect) {
     let items: Vec<ListItem> = app
-        .items
+        .items()
         .iter()
-        .enumerate()
-        .map(|(i, item)| {
-            let is_selected = app.selected.contains(&i);
+        .map(|item| {
+            let is_selected = item.is_selected();
             let style = if is_selected {
                 Style::default()
                     .fg(Color::Yellow)
@@ -68,7 +66,7 @@ fn render_items(f: &mut Frame, app: &App, area: Rect) {
             };
 
             let prefix = if is_selected { "✓ " } else { "  " };
-            let content = format!("{}{}", prefix, item);
+            let content = format!("{}{}", prefix, item.value());
 
             ListItem::new(content).style(style)
         })
@@ -83,20 +81,21 @@ fn render_items(f: &mut Frame, app: &App, area: Rect) {
         )
         .highlight_symbol("> ");
 
-    let indices = if app.filtered_indices.is_empty() {
-        (0..app.items.len()).collect::<Vec<_>>()
-    } else {
-        app.filtered_indices.clone()
-    };
+    // let indices = if app.filtered_indices.is_empty() {
+    //     (0..app.items.len()).collect::<Vec<_>>()
+    // } else {
+    //     app.filtered_indices.clone()
+    // };
 
-    let selected_index = if !indices.is_empty() {
-        indices
-            .iter()
-            .position(|&i| i == app.current_index)
-            .unwrap_or(0)
-    } else {
-        0
-    };
+    let selected_index = 0;
+    // let selected_index = if !indices.is_empty() {
+    //     indices
+    //         .iter()
+    //         .position(|&i| i == app.current_index)
+    //         .unwrap_or(0)
+    // } else {
+    //     0
+    // };
 
     f.render_stateful_widget(
         items,

@@ -1,4 +1,5 @@
 mod app;
+mod selectable;
 mod ui;
 
 use std::fs;
@@ -36,8 +37,9 @@ fn main() -> Result<()> {
     let mut terminal = Terminal::new(backend)?;
 
     // Create app state
-    let mut app = App::new();
+    let app = App::new();
 
+    // TODO wrap item loading in a spawned thread so we don't block the UI
     // Load items
     if !args.dirs.is_empty() {
         // List files from directories
@@ -47,7 +49,7 @@ fn main() -> Result<()> {
 
             for entry in entries {
                 if let Ok(entry) = entry {
-                    app.items.push(entry.path().display().to_string());
+                    app.push(entry.path().to_string_lossy().as_ref());
                 }
             }
         }
@@ -56,7 +58,7 @@ fn main() -> Result<()> {
         let stdin = io::stdin();
         for line in stdin.lock().lines() {
             if let Ok(line) = line {
-                app.items.push(line);
+                app.push(&line);
             }
         }
     }
@@ -96,10 +98,8 @@ fn run_app<B: ratatui::backend::Backend>(
                     }
                     KeyCode::Enter => {
                         // Print selected items and exit
-                        for (i, item) in app.items.iter().enumerate() {
-                            if app.selected.contains(&i) {
-                                println!("{}", item);
-                            }
+                        for item in app.selected_items().iter() {
+                            println!("{}", item);
                         }
                         return Ok(());
                     }
