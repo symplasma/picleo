@@ -93,7 +93,13 @@ fn run_app<B: ratatui::backend::Backend>(
         if let Event::Key(key) = event::read()? {
             if key.kind == KeyEventKind::Press {
                 match key.code {
-                    KeyCode::Char('q') | KeyCode::Esc => {
+                    KeyCode::Char(key) => {
+                        app.append_to_query(key);
+                    }
+                    KeyCode::Backspace => {
+                        app.delete_from_query();
+                    }
+                    KeyCode::Esc => {
                         return Ok(());
                     }
                     KeyCode::Enter => {

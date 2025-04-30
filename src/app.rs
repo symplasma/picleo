@@ -151,4 +151,12 @@ impl App {
         //     self.current_index = self.filtered_indices[0];
         // }
     }
+
+    pub(crate) fn append_to_query(&mut self, key: char) {
+        self.query.push(key);
+    }
+
+    pub(crate) fn delete_from_query(&mut self) {
+        self.query.pop();
+    }
 }
