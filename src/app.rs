@@ -9,12 +9,8 @@ pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 pub struct App {
     pub matcher: Nucleo<Selectable<String>>,
     pub injector: Injector<Selectable<String>>,
-    // TODO we can probably remove items since we have a matcher now
-    // pub items: Vec<String>,
     pub current_index: u32,
-    // pub selected: Vec<usize>,
     pub query: String,
-    // pub filtered_indices: Vec<usize>,
 }
 
 impl App {
@@ -24,11 +20,8 @@ impl App {
         App {
             matcher,
             injector,
-            // items: Vec::new(),
             current_index: 0,
-            // selected: Vec::new(),
             query: String::new(),
-            // filtered_indices: Vec::new(),
         }
     }
 
@@ -48,14 +41,6 @@ impl App {
 
     pub fn items(&self) -> Vec<&Selectable<String>> {
         self.snapshot().matched_items(..).map(|i| i.data).collect()
-    }
-
-    pub fn selected_items(&self) -> Vec<&String> {
-        self.snapshot()
-            .matched_items(..)
-            .filter(|i| i.data.is_selected())
-            .map(|i| i.data.value())
-            .collect()
     }
 
     pub(crate) fn lines_to_print(&self) -> Vec<String> {
@@ -112,17 +97,6 @@ impl App {
         snapshot.get_matched_item(self.current_index).map(|i| {
             i.data.toggle_selected();
         });
-    }
-
-    pub fn update_search(&mut self, query: &str) {
-        self.query = query.to_string();
-
-        // Use nucleo for matching
-        let matcher = nucleo::pattern::Pattern::new(
-            query,
-            nucleo::pattern::CaseMatching::Smart,
-            nucleo::pattern::AtomKind::Exact,
-        );
     }
 
     pub(crate) fn append_to_query(&mut self, key: char) {
