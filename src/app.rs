@@ -139,4 +139,12 @@ impl App {
             .pattern
             .reparse(0, &self.query, CaseMatching::Smart, false);
     }
+
+    pub(crate) fn clear_query(&mut self) {
+        self.query.clear();
+        // TODO seems like there should be a better way to clear the query
+        self.matcher
+            .pattern
+            .reparse(0, &self.query, CaseMatching::Smart, false);
+    }
 }

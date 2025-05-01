@@ -110,6 +110,9 @@ fn run_app<B: ratatui::backend::Backend>(
                 (KeyCode::Esc, KeyModifiers::NONE) => {
                     return Ok(vec![]);
                 }
+                (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
+                    app.clear_query();
+                }
                 (KeyCode::Char('c'), KeyModifiers::CONTROL) => {
                     return Ok(vec![]);
                 }
