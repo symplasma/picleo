@@ -27,6 +27,14 @@ impl App {
         }
     }
 
+    pub(crate) fn inject_items<F>(&self, f: F)
+    where
+        F: FnOnce(&Injector<Selectable<String>>),
+    {
+        let injector = self.matcher.injector();
+        f(&injector);
+    }
+
     pub fn push(&self, str: &str) {
         self.injector.push(Selectable::new(str.into()), |columns| {
             columns[0] = str.into();

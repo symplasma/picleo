@@ -6,7 +6,7 @@ use std::fs;
 use std::io::{self, BufRead};
 use std::path::PathBuf;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use clap::Parser;
 use crossterm::{
     event::{DisableMouseCapture, EnableMouseCapture},
@@ -14,6 +14,7 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
+use selectable::Selectable;
 
 use crate::app::App;
 
@@ -41,17 +42,20 @@ fn main() -> Result<()> {
     // TODO wrap item loading in a spawned thread so we don't block the UI
     // Load items
     if !args.dirs.is_empty() {
-        // List files from directories
-        for dir in args.dirs {
-            let entries = fs::read_dir(&dir)
-                .with_context(|| format!("Failed to read directory: {}", dir.display()))?;
-
-            for entry in entries {
-                if let Ok(entry) = entry {
-                    app.push(entry.path().to_string_lossy().as_ref());
+        app.inject_items(|i|
+            // List files from directories
+            for dir in args.dirs {
+                // TODO: might want to do something about errors here instead of silently ignoring them
+                // .with_context(|| format!("Failed to read directory: {}", dir.display()))?;
+                if let Ok(entries) = fs::read_dir(&dir) {
+                    for entry in entries.flatten() {
+                        let path = entry.path();
+                        let str = path.to_string_lossy();
+                        i.push(Selectable::new(str.clone().into()), |columns| columns[0] = str.into());
+                    }
                 }
             }
-        }
+        );
     } else {
         // Read from stdin
         let stdin = io::stdin();
