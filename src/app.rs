@@ -1,8 +1,10 @@
 use std::{error, sync::Arc};
 
+use crossterm::event::{self, Event, KeyCode, KeyModifiers};
 use nucleo::{pattern::CaseMatching, Config, Injector, Nucleo, Snapshot};
+use ratatui::Terminal;
 
-use crate::selectable::Selectable;
+use crate::{selectable::Selectable, ui::ui};
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
@@ -120,5 +122,51 @@ impl App {
         self.matcher
             .pattern
             .reparse(0, &self.query, CaseMatching::Smart, false);
+    }
+
+    pub(crate) fn run<B: ratatui::backend::Backend>(
+        &mut self,
+        terminal: &mut Terminal<B>,
+    ) -> AppResult<Vec<String>> {
+        loop {
+            self.tick(10);
+            terminal.draw(|f| ui(f, self))?;
+
+            if let Ok(Event::Key(key)) = event::read() {
+                match (key.code, key.modifiers) {
+                    (KeyCode::Char(key), KeyModifiers::NONE) => {
+                        self.append_to_query(key);
+                    }
+                    (KeyCode::Backspace, KeyModifiers::NONE) => {
+                        self.delete_from_query();
+                    }
+                    (KeyCode::Esc, KeyModifiers::NONE) => {
+                        return Ok(vec![]);
+                    }
+                    (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
+                        self.clear_query();
+                    }
+                    (KeyCode::Char('c'), KeyModifiers::CONTROL) => {
+                        return Ok(vec![]);
+                    }
+                    (KeyCode::Enter, KeyModifiers::NONE) => {
+                        // Print selected items and exit
+                        return Ok(self.lines_to_print());
+                    }
+                    (KeyCode::Down, KeyModifiers::NONE) => {
+                        self.next();
+                    }
+                    (KeyCode::Up, KeyModifiers::NONE) => {
+                        self.previous();
+                    }
+                    (KeyCode::Tab, KeyModifiers::NONE) => {
+                        self.toggle_selected();
+                    }
+
+                    // ignore other key codes
+                    _ => {}
+                }
+            };
+        }
     }
 }

@@ -8,16 +8,14 @@ use std::path::PathBuf;
 
 use anyhow::{Context, Result};
 use clap::Parser;
-use crossterm::event::KeyModifiers;
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    event::{DisableMouseCapture, EnableMouseCapture},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
 
-use crate::app::{App, AppResult};
-use crate::ui::ui;
+use crate::app::App;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -38,7 +36,7 @@ fn main() -> Result<()> {
     let mut terminal = Terminal::new(backend)?;
 
     // Create app state
-    let app = App::new();
+    let mut app = App::new();
 
     // TODO wrap item loading in a spawned thread so we don't block the UI
     // Load items
@@ -65,7 +63,7 @@ fn main() -> Result<()> {
     }
 
     // Run app
-    let res = run_app(&mut terminal, app);
+    let res = app.run(&mut terminal);
 
     // Restore terminal
     disable_raw_mode()?;
@@ -89,50 +87,4 @@ fn main() -> Result<()> {
     }
 
     Ok(())
-}
-
-fn run_app<B: ratatui::backend::Backend>(
-    terminal: &mut Terminal<B>,
-    mut app: App,
-) -> AppResult<Vec<String>> {
-    loop {
-        app.tick(10);
-        terminal.draw(|f| ui(f, &mut app))?;
-
-        if let Ok(Event::Key(key)) = event::read() {
-            match (key.code, key.modifiers) {
-                (KeyCode::Char(key), KeyModifiers::NONE) => {
-                    app.append_to_query(key);
-                }
-                (KeyCode::Backspace, KeyModifiers::NONE) => {
-                    app.delete_from_query();
-                }
-                (KeyCode::Esc, KeyModifiers::NONE) => {
-                    return Ok(vec![]);
-                }
-                (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
-                    app.clear_query();
-                }
-                (KeyCode::Char('c'), KeyModifiers::CONTROL) => {
-                    return Ok(vec![]);
-                }
-                (KeyCode::Enter, KeyModifiers::NONE) => {
-                    // Print selected items and exit
-                    return Ok(app.lines_to_print());
-                }
-                (KeyCode::Down, KeyModifiers::NONE) => {
-                    app.next();
-                }
-                (KeyCode::Up, KeyModifiers::NONE) => {
-                    app.previous();
-                }
-                (KeyCode::Tab, KeyModifiers::NONE) => {
-                    app.toggle_selected();
-                }
-
-                // ignore other key codes
-                _ => {}
-            }
-        };
-    }
 }
