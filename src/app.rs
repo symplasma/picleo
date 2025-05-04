@@ -1,8 +1,12 @@
-use std::{error, sync::Arc};
+use std::{error, io, sync::Arc};
 
-use crossterm::event::{self, Event, KeyCode, KeyModifiers};
+use crossterm::{
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers},
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
 use nucleo::{pattern::CaseMatching, Config, Injector, Nucleo, Snapshot};
-use ratatui::Terminal;
+use ratatui::{prelude::CrosstermBackend, Terminal};
 
 use crate::{selectable::Selectable, ui::ui};
 
@@ -132,7 +136,29 @@ impl App {
             .reparse(0, &self.query, CaseMatching::Smart, false);
     }
 
-    pub(crate) fn run<B: ratatui::backend::Backend>(
+    pub(crate) fn run(&mut self) -> AppResult<Vec<String>> {
+        // Setup terminal
+        enable_raw_mode()?;
+        let mut stdout = io::stdout();
+        execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
+        let backend = CrosstermBackend::new(stdout);
+        let mut terminal = Terminal::new(backend)?;
+
+        let result = self.run_loop(&mut terminal);
+
+        // Restore terminal
+        disable_raw_mode()?;
+        execute!(
+            terminal.backend_mut(),
+            LeaveAlternateScreen,
+            DisableMouseCapture
+        )?;
+        terminal.show_cursor()?;
+
+        result
+    }
+
+    pub(crate) fn run_loop<B: ratatui::backend::Backend>(
         &mut self,
         terminal: &mut Terminal<B>,
     ) -> AppResult<Vec<String>> {
