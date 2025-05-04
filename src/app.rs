@@ -14,7 +14,6 @@ pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
 pub struct Picker {
     pub matcher: Nucleo<Selectable<String>>,
-    pub injector: Injector<Selectable<String>>,
     pub current_index: u32,
     pub query: String,
 }
@@ -22,10 +21,8 @@ pub struct Picker {
 impl Picker {
     pub fn new() -> Self {
         let matcher = Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
-        let injector = matcher.injector();
         Picker {
             matcher,
-            injector,
             current_index: 0,
             query: String::new(),
         }
@@ -37,12 +34,6 @@ impl Picker {
     {
         let injector = self.matcher.injector();
         f(&injector);
-    }
-
-    pub fn push(&self, str: &str) {
-        self.injector.push(Selectable::new(str.into()), |columns| {
-            columns[0] = str.into();
-        });
     }
 
     pub fn tick(&mut self, timeout: u64) {
