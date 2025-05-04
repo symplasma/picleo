@@ -6,9 +6,9 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::App;
+use crate::app::Picker;
 
-pub fn ui(f: &mut Frame, app: &mut App) {
+pub fn ui(f: &mut Frame, app: &mut Picker) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(2)
@@ -44,14 +44,14 @@ fn render_help(f: &mut Frame, area: Rect) {
     f.render_widget(paragraph, area);
 }
 
-fn render_search_input(f: &mut Frame, app: &App, area: Rect) {
+fn render_search_input(f: &mut Frame, app: &Picker, area: Rect) {
     let input = Paragraph::new(app.query.as_str())
         .style(Style::default())
         .block(Block::default().borders(Borders::ALL).title("Search"));
     f.render_widget(input, area);
 }
 
-fn render_items(f: &mut Frame, app: &App, area: Rect) {
+fn render_items(f: &mut Frame, app: &Picker, area: Rect) {
     let items: Vec<ListItem> = app
         .items()
         .iter()

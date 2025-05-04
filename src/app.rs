@@ -12,18 +12,18 @@ use crate::{selectable::Selectable, ui::ui};
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
-pub struct App {
+pub struct Picker {
     pub matcher: Nucleo<Selectable<String>>,
     pub injector: Injector<Selectable<String>>,
     pub current_index: u32,
     pub query: String,
 }
 
-impl App {
+impl Picker {
     pub fn new() -> Self {
         let matcher = Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
         let injector = matcher.injector();
-        App {
+        Picker {
             matcher,
             injector,
             current_index: 0,

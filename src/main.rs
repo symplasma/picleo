@@ -10,7 +10,7 @@ use anyhow::Result;
 use clap::Parser;
 use selectable::Selectable;
 
-use crate::app::App;
+use crate::app::Picker;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -24,12 +24,12 @@ fn main() -> Result<()> {
     let args = Args::parse();
 
     // Create app state
-    let mut app = App::new();
+    let mut picker = Picker::new();
 
     // TODO wrap item loading in a spawned thread so we don't block the UI
     // Load items
     if !args.dirs.is_empty() {
-        app.inject_items(|i|
+        picker.inject_items(|i|
             // List files from directories
             for dir in args.dirs {
                 // TODO: might want to do something about errors here instead of silently ignoring them
@@ -44,7 +44,7 @@ fn main() -> Result<()> {
             }
         );
     } else {
-        app.inject_items(|i| {
+        picker.inject_items(|i| {
             // Read from stdin
             let stdin = io::stdin();
             for line in stdin.lock().lines() {
@@ -58,7 +58,7 @@ fn main() -> Result<()> {
     }
 
     // Run app
-    match app.run() {
+    match picker.run() {
         Ok(lines) => {
             for line in lines {
                 println!("{}", line)
