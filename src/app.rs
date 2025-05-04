@@ -57,7 +57,7 @@ impl Picker {
             .map(|i| i.data.value().to_owned().clone())
             .collect();
 
-        if selected_items.len() > 0 {
+        if !selected_items.is_empty() {
             selected_items
         } else {
             self.snapshot()
@@ -99,9 +99,9 @@ impl Picker {
         }
 
         // get the currently selected item and toggle it's selected state
-        snapshot.get_matched_item(self.current_index).map(|i| {
+        if let Some(i) = snapshot.get_matched_item(self.current_index) {
             i.data.toggle_selected();
-        });
+        };
     }
 
     pub(crate) fn append_to_query(&mut self, key: char) {

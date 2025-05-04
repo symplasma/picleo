@@ -46,13 +46,11 @@ fn main() -> Result<()> {
     } else {
         picker.inject_items(|i| {
             // Read from stdin
-            let stdin = io::stdin();
-            for line in stdin.lock().lines() {
-                if let Ok(line) = line {
-                    i.push(Selectable::new(line.clone()), |columns| {
-                        columns[0] = line.into()
-                    });
-                }
+            // TODO: might want to handle read errors from stdin
+            for line in io::stdin().lock().lines().map_while(Result::ok) {
+                i.push(Selectable::new(line.clone()), |columns| {
+                    columns[0] = line.into()
+                });
             }
         });
     }
