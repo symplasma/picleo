@@ -57,13 +57,17 @@ fn main() -> Result<()> {
             }
         );
     } else {
-        // Read from stdin
-        let stdin = io::stdin();
-        for line in stdin.lock().lines() {
-            if let Ok(line) = line {
-                app.push(&line);
+        app.inject_items(|i| {
+            // Read from stdin
+            let stdin = io::stdin();
+            for line in stdin.lock().lines() {
+                if let Ok(line) = line {
+                    i.push(Selectable::new(line.clone()), |columns| {
+                        columns[0] = line.into()
+                    });
+                }
             }
-        }
+        });
     }
 
     // Run app
