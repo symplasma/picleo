@@ -18,6 +18,8 @@ pub struct Picker {
     pub query: String,
 }
 
+// TODO make the picker class generic
+// TODO maybe expose the Nucleo update callback
 impl Picker {
     pub fn new() -> Self {
         let matcher = Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
