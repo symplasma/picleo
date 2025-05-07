@@ -24,7 +24,7 @@ fn main() -> Result<()> {
     let args = Args::parse();
 
     // Create app state
-    let mut picker = Picker::new();
+    let mut picker = Picker::<Selectable<String>>::new();
 
     // TODO wrap item loading in a spawned thread so we don't block the UI
     // Load items
@@ -38,7 +38,7 @@ fn main() -> Result<()> {
                     for entry in entries.flatten() {
                         let path = entry.path();
                         let str = path.to_string_lossy();
-                        i.push(Selectable::new(str.clone().into()), |columns| columns[0] = str.into());
+                        i.push(Selectable::new(str.to_string()), |columns| columns[0] = str.into());
                     }
                 }
             }

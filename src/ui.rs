@@ -8,7 +8,10 @@ use ratatui::{
 
 use crate::app::Picker;
 
-pub fn ui(f: &mut Frame, app: &mut Picker) {
+pub fn ui<T: std::marker::Sync + std::marker::Send + std::fmt::Display>(
+    f: &mut Frame,
+    app: &mut Picker<T>,
+) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(2)
@@ -44,14 +47,22 @@ fn render_help(f: &mut Frame, area: Rect) {
     f.render_widget(paragraph, area);
 }
 
-fn render_search_input(f: &mut Frame, app: &Picker, area: Rect) {
+fn render_search_input<T: std::marker::Sync + std::marker::Send>(
+    f: &mut Frame,
+    app: &Picker<T>,
+    area: Rect,
+) {
     let input = Paragraph::new(app.query.as_str())
         .style(Style::default())
         .block(Block::default().borders(Borders::ALL).title("Search"));
     f.render_widget(input, area);
 }
 
-fn render_items(f: &mut Frame, app: &Picker, area: Rect) {
+fn render_items<T: std::marker::Sync + std::marker::Send + std::fmt::Display>(
+    f: &mut Frame,
+    app: &Picker<T>,
+    area: Rect,
+) {
     let items: Vec<ListItem> = app
         .items()
         .iter()
@@ -66,7 +77,7 @@ fn render_items(f: &mut Frame, app: &Picker, area: Rect) {
             };
 
             let prefix = if is_selected { "✓ " } else { "  " };
-            let content = format!("{}{}", prefix, item.value());
+            let content = format!("{}{}", prefix, item);
 
             ListItem::new(content).style(style)
         })

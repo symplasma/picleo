@@ -1,9 +1,18 @@
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::{
+    fmt::Display,
+    sync::atomic::{AtomicBool, Ordering},
+};
 
 #[derive(Debug)]
 pub struct Selectable<T> {
     value: T,
     selected: AtomicBool,
+}
+
+impl<T: Display> Display for Selectable<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value.to_string())
+    }
 }
 
 impl<T> Selectable<T> {

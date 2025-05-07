@@ -12,15 +12,15 @@ use crate::{selectable::Selectable, ui::ui};
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
-pub struct Picker {
-    pub matcher: Nucleo<Selectable<String>>,
+// TODO convert static to a proper lifetime
+pub struct Picker<T: std::marker::Sync + std::marker::Send + 'static> {
+    pub matcher: Nucleo<Selectable<T>>,
     pub current_index: u32,
     pub query: String,
 }
 
-// TODO make the picker class generic
 // TODO maybe expose the Nucleo update callback
-impl Picker {
+impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
     pub fn new() -> Self {
         let matcher = Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
         Picker {
@@ -32,7 +32,7 @@ impl Picker {
 
     pub(crate) fn inject_items<F>(&self, f: F)
     where
-        F: FnOnce(&Injector<Selectable<String>>),
+        F: FnOnce(&Injector<Selectable<T>>),
     {
         let injector = self.matcher.injector();
         f(&injector);
@@ -42,21 +42,21 @@ impl Picker {
         self.matcher.tick(timeout);
     }
 
-    pub fn snapshot(&self) -> &Snapshot<Selectable<String>> {
+    pub fn snapshot(&self) -> &Snapshot<Selectable<T>> {
         self.matcher.snapshot()
     }
 
-    pub fn items(&self) -> Vec<&Selectable<String>> {
+    pub fn items(&self) -> Vec<&Selectable<T>> {
         self.snapshot().matched_items(..).map(|i| i.data).collect()
     }
 
-    pub(crate) fn lines_to_print(&self) -> Vec<String> {
+    pub(crate) fn selected_items(&self) -> Vec<&T> {
         // NOTE: matched_items is not factored out due to ownership issues
-        let selected_items: Vec<String> = self
+        let selected_items: Vec<&T> = self
             .snapshot()
             .matched_items(..)
             .filter(|i| i.data.is_selected())
-            .map(|i| i.data.value().to_owned().clone())
+            .map(|i| i.data.value())
             .collect();
 
         if !selected_items.is_empty() {
@@ -65,8 +65,8 @@ impl Picker {
             self.snapshot()
                 .matched_items(..)
                 .nth(self.current_index as usize)
-                .map(|i| vec![i.data.value().to_owned()])
-                .unwrap_or(vec![String::new()])
+                .map(|i| vec![i.data.value()])
+                .unwrap_or(vec![])
         }
     }
 
@@ -129,7 +129,7 @@ impl Picker {
             .reparse(0, &self.query, CaseMatching::Smart, false);
     }
 
-    pub(crate) fn run(&mut self) -> AppResult<Vec<String>> {
+    pub(crate) fn run(&mut self) -> AppResult<Vec<&T>> {
         // Setup terminal
         enable_raw_mode()?;
         let mut stdout = io::stdout();
@@ -154,7 +154,7 @@ impl Picker {
     pub(crate) fn run_loop<B: ratatui::backend::Backend>(
         &mut self,
         terminal: &mut Terminal<B>,
-    ) -> AppResult<Vec<String>> {
+    ) -> AppResult<Vec<&T>> {
         loop {
             self.tick(10);
             terminal.draw(|f| ui(f, self))?;
@@ -178,7 +178,7 @@ impl Picker {
                     }
                     (KeyCode::Enter, KeyModifiers::NONE) => {
                         // Print selected items and exit
-                        return Ok(self.lines_to_print());
+                        return Ok(self.selected_items());
                     }
                     (KeyCode::Down, KeyModifiers::NONE) => {
                         self.next();
