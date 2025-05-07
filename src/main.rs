@@ -24,7 +24,7 @@ fn main() -> Result<()> {
     let args = Args::parse();
 
     // Create app state
-    let mut picker = Picker::<Selectable<String>>::new();
+    let mut picker = Picker::<String>::new();
 
     // TODO wrap item loading in a spawned thread so we don't block the UI
     // Load items
