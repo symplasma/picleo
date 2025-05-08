@@ -30,7 +30,7 @@ impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
         }
     }
 
-    pub(crate) fn inject_items<F>(&self, f: F)
+    pub fn inject_items<F>(&self, f: F)
     where
         F: FnOnce(&Injector<Selectable<T>>),
     {
@@ -129,7 +129,7 @@ impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
             .reparse(0, &self.query, CaseMatching::Smart, false);
     }
 
-    pub(crate) fn run(&mut self) -> AppResult<Vec<&T>> {
+    pub fn run(&mut self) -> AppResult<Vec<&T>> {
         // Setup terminal
         enable_raw_mode()?;
         let mut stdout = io::stdout();

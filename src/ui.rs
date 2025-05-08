@@ -6,7 +6,7 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::Picker;
+use crate::picker::Picker;
 
 pub fn ui<T: std::marker::Sync + std::marker::Send + std::fmt::Display>(
     f: &mut Frame,

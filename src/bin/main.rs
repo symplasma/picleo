@@ -1,6 +1,4 @@
-mod app;
-mod selectable;
-mod ui;
+extern crate picleo;
 
 use std::fs;
 use std::io::{self, BufRead};
@@ -8,9 +6,9 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use clap::Parser;
-use selectable::Selectable;
+use picleo::selectable::Selectable;
 
-use crate::app::Picker;
+use picleo::picker::Picker;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
