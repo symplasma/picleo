@@ -2,6 +2,15 @@
 name = "picleo"
 version = "0.1.0"
 edition = "2021"
+license = "BSD-3-Clause"                                                                                              # https://spdx.org/licenses/
+authors = ["Elio Grieco <grieco@egx.com>"]
+description = "A fuzzy picker similar to fzf and Skim using the Nucleo library. Can be used via CLI or as a library."
+repository = "https://github.com/symplasma/picleo"
+readme = "README.md"
+keywords = ["fuzzy", "search", "picker", "menu", "nucleo"]                                                            # free text
+categories = ["command-line-utilities"]                                                                               # https://crates.io/category_slugs
+exclude = [".vscode/*", ".gitignore", ".aider.*"]
+# https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 ratatui = "0.24.0"
