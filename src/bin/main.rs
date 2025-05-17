@@ -59,7 +59,7 @@ fn main() -> Result<()> {
                     for entry in entries.flatten() {
                         let path = entry.path();
                         let display_path = DisplayPath(path);
-                        i.push(Selectable::new(display_path), |columns| columns[0] = display_path.to_string().into());
+                        i.push(Selectable::new(display_path.clone()), |columns| columns[0] = display_path.to_string().into());
                     }
                 }
             }
