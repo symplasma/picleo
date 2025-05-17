@@ -1,6 +1,7 @@
 extern crate picleo;
 
 use std::fs;
+use std::fmt;
 use std::io::{self, BufRead};
 use std::path::PathBuf;
 
@@ -9,6 +10,28 @@ use clap::Parser;
 use picleo::selectable::Selectable;
 
 use picleo::picker::Picker;
+
+// Wrapper for PathBuf that implements Display
+#[derive(Debug, Clone)]
+struct DisplayPath(PathBuf);
+
+impl fmt::Display for DisplayPath {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0.display())
+    }
+}
+
+impl From<PathBuf> for DisplayPath {
+    fn from(path: PathBuf) -> Self {
+        DisplayPath(path)
+    }
+}
+
+impl AsRef<PathBuf> for DisplayPath {
+    fn as_ref(&self) -> &PathBuf {
+        &self.0
+    }
+}
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -25,7 +48,7 @@ fn main() -> Result<()> {
     // Load items
     if !args.dirs.is_empty() {
         // Create app state
-        let mut picker = Picker::<PathBuf>::new();
+        let mut picker = Picker::<DisplayPath>::new();
 
         picker.inject_items(|i|
             // List files from directories
@@ -35,8 +58,8 @@ fn main() -> Result<()> {
                 if let Ok(entries) = fs::read_dir(&dir) {
                     for entry in entries.flatten() {
                         let path = entry.path();
-                        let str = path.to_string_lossy();
-                        i.push(Selectable::new(str.to_string()), |columns| columns[0] = str.into());
+                        let display_path = DisplayPath(path);
+                        i.push(Selectable::new(display_path), |columns| columns[0] = display_path.to_string().into());
                     }
                 }
             }
@@ -44,9 +67,9 @@ fn main() -> Result<()> {
 
         // Run app
         match picker.run() {
-            Ok(lines) => {
-                for line in lines {
-                    println!("{}", line)
+            Ok(paths) => {
+                for path in paths {
+                    println!("{}", path.0.display())
                 }
             }
             Err(err) => {
