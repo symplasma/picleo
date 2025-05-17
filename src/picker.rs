@@ -1,4 +1,4 @@
-use std::{error, io, sync::Arc};
+use std::{error, fmt::Display, io, sync::Arc};
 
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers},
@@ -17,6 +17,12 @@ pub struct Picker<T: std::marker::Sync + std::marker::Send + 'static> {
     pub matcher: Nucleo<Selectable<T>>,
     pub current_index: u32,
     pub query: String,
+}
+
+impl<T: Sync + Send + Display> Default for Picker<T> {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 // TODO maybe expose the Nucleo update callback
@@ -66,7 +72,7 @@ impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
                 .matched_items(..)
                 .nth(self.current_index as usize)
                 .map(|i| vec![i.data.value()])
-                .unwrap_or(vec![])
+                .unwrap_or_default()
         }
     }
 

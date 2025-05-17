@@ -11,7 +11,7 @@ pub struct Selectable<T> {
 
 impl<T: Display> Display for Selectable<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.value.to_string())
+        write!(f, "{}", self.value)
     }
 }
 
