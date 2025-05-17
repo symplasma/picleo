@@ -21,12 +21,12 @@ struct Args {
 fn main() -> Result<()> {
     let args = Args::parse();
 
-    // Create app state
-    let mut picker = Picker::<String>::new();
-
     // TODO wrap item loading in a spawned thread so we don't block the UI
     // Load items
     if !args.dirs.is_empty() {
+        // Create app state
+        let mut picker = Picker::<PathBuf>::new();
+
         picker.inject_items(|i|
             // List files from directories
             for dir in args.dirs {
@@ -41,7 +41,23 @@ fn main() -> Result<()> {
                 }
             }
         );
+
+        // Run app
+        match picker.run() {
+            Ok(lines) => {
+                for line in lines {
+                    println!("{}", line)
+                }
+            }
+            Err(err) => {
+                println!("{err:?}");
+                return Err(anyhow::anyhow!("{:?}", err));
+            }
+        }
     } else {
+        // Create app state
+        let mut picker = Picker::<String>::new();
+
         picker.inject_items(|i| {
             // Read from stdin
             // TODO: might want to handle read errors from stdin
@@ -51,18 +67,18 @@ fn main() -> Result<()> {
                 });
             }
         });
-    }
 
-    // Run app
-    match picker.run() {
-        Ok(lines) => {
-            for line in lines {
-                println!("{}", line)
+        // Run app
+        match picker.run() {
+            Ok(lines) => {
+                for line in lines {
+                    println!("{}", line)
+                }
             }
-        }
-        Err(err) => {
-            println!("{err:?}");
-            return Err(anyhow::anyhow!("{:?}", err));
+            Err(err) => {
+                println!("{err:?}");
+                return Err(anyhow::anyhow!("{:?}", err));
+            }
         }
     }
 
