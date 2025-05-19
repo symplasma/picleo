@@ -138,9 +138,10 @@ impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
     pub fn run(&mut self) -> AppResult<Vec<&T>> {
         // Setup terminal
         enable_raw_mode()?;
-        let mut stdout = io::stdout();
-        execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
-        let backend = CrosstermBackend::new(stdout);
+        // TODO should we allow the caller to pass any arbitrary stream?
+        let mut stream = io::stderr();
+        execute!(stream, EnterAlternateScreen, EnableMouseCapture)?;
+        let backend = CrosstermBackend::new(stream);
         let mut terminal = Terminal::new(backend)?;
 
         let result = self.run_loop(&mut terminal);
