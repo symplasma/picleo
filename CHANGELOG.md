@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.1.1 (2025-05-20)
 
+<csr-id-0d12ccbe8bcc3e7810813343b36f294b47e9d46a/>
+
 ### New Features
 
  - <csr-id-d07f07b893a7980776127e27ec061d8ad3f67798/> add DisplayPath wrapper to support PathBuf in Picker
@@ -19,13 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
  - <csr-id-0d12ccbe8bcc3e7810813343b36f294b47e9d46a/> restructure main function to handle file and stdin input separately
 
+### Chore
+
+ - <csr-id-8f211607f28408986f6ceb72f9d111a4e14241c2/> Add smart-release generated changelog
+
 ### Commit Statistics
 
 <csr-read-only-do-not-edit/>
 
- - 8 commits contributed to the release over the course of 2 calendar days.
- - 10 days passed between releases.
- - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 10 commits contributed to the release over the course of 2 calendar days.
+ - 11 days passed between releases.
+ - 4 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
 ### Commit Details
@@ -35,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Add smart-release generated changelog ([`8f21160`](https://github.com/symplasma/picleo/commit/8f211607f28408986f6ceb72f9d111a4e14241c2))
+    - Release picleo v0.1.1 ([`feff30a`](https://github.com/symplasma/picleo/commit/feff30a6100d932509f1f2d91cf9d33aab4b9aab))
     - Upgrade incompatible dependencies ([`d075281`](https://github.com/symplasma/picleo/commit/d075281f6a0758bf752f0107f28872a5fba194e7))
     - Upgrade compatible dependencies ([`9bdbde5`](https://github.com/symplasma/picleo/commit/9bdbde598107e5528a4c2860d1152c44c9c46939))
     - Switch to rendering the TUI on stderr ([`782d378`](https://github.com/symplasma/picleo/commit/782d37878c5e43fa5d65cd8c73aee9ccae24e0c9))
