@@ -1,7 +1,7 @@
 extern crate picleo;
 
-use std::fs;
 use std::fmt;
+use std::fs;
 use std::io::{self, BufRead};
 use std::path::PathBuf;
 
@@ -58,8 +58,7 @@ fn main() -> Result<()> {
                 if let Ok(entries) = fs::read_dir(&dir) {
                     for entry in entries.flatten() {
                         let path = entry.path();
-                        let display_path = DisplayPath(path);
-                        i.push(Selectable::new(display_path.clone()), |columns| columns[0] = display_path.to_string().into());
+                        i.push(Selectable::new(DisplayPath(path).clone()), |item, columns| columns[0] = item.to_string().into());
                     }
                 }
             }
@@ -85,8 +84,8 @@ fn main() -> Result<()> {
             // Read from stdin
             // TODO: might want to handle read errors from stdin
             for line in io::stdin().lock().lines().map_while(Result::ok) {
-                i.push(Selectable::new(line.clone()), |columns| {
-                    columns[0] = line.into()
+                i.push(Selectable::new(line.clone()), |item, columns| {
+                    columns[0] = item.to_string().into()
                 });
             }
         });

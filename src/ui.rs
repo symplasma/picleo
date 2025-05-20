@@ -23,7 +23,7 @@ pub fn ui<T: std::marker::Sync + std::marker::Send + std::fmt::Display>(
             ]
             .as_ref(),
         )
-        .split(f.size());
+        .split(f.area());
 
     render_help(f, chunks[0]);
     render_search_input(f, app, chunks[1]);

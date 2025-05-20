@@ -5,7 +5,10 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use nucleo::{pattern::CaseMatching, Config, Injector, Nucleo, Snapshot};
+use nucleo::{
+    pattern::{CaseMatching, Normalization},
+    Config, Injector, Nucleo, Snapshot,
+};
 use ratatui::{prelude::CrosstermBackend, Terminal};
 
 use crate::{selectable::Selectable, ui::ui};
@@ -115,24 +118,36 @@ impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
     pub(crate) fn append_to_query(&mut self, key: char) {
         // TODO constrain selected item to match range
         self.query.push(key);
-        self.matcher
-            .pattern
-            .reparse(0, &self.query, CaseMatching::Smart, true);
+        self.matcher.pattern.reparse(
+            0,
+            &self.query,
+            CaseMatching::Smart,
+            Normalization::Smart,
+            true,
+        );
     }
 
     pub(crate) fn delete_from_query(&mut self) {
         self.query.pop();
-        self.matcher
-            .pattern
-            .reparse(0, &self.query, CaseMatching::Smart, false);
+        self.matcher.pattern.reparse(
+            0,
+            &self.query,
+            CaseMatching::Smart,
+            Normalization::Smart,
+            false,
+        );
     }
 
     pub(crate) fn clear_query(&mut self) {
         self.query.clear();
         // TODO seems like there should be a better way to clear the query
-        self.matcher
-            .pattern
-            .reparse(0, &self.query, CaseMatching::Smart, false);
+        self.matcher.pattern.reparse(
+            0,
+            &self.query,
+            CaseMatching::Smart,
+            Normalization::Smart,
+            false,
+        );
     }
 
     pub fn run(&mut self) -> AppResult<Vec<&T>> {
