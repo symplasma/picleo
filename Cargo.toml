@@ -15,6 +15,6 @@ exclude = [".vscode/*", ".gitignore", ".aider.*"]
 [dependencies]
 ratatui = "0.24.0"
 crossterm = "0.27.0"
-nucleo = "0.2.0"
-anyhow = "1.0.75"
-clap = { version = "4.4.6", features = ["derive"] }
+nucleo = "0.2.1"
+anyhow = "1.0.98"
+clap = { version = "4.5.38", features = ["derive"] }
