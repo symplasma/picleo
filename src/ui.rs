@@ -28,6 +28,9 @@ pub fn ui<T: std::marker::Sync + std::marker::Send + std::fmt::Display>(
     render_help(f, chunks[0]);
     render_search_input(f, app, chunks[1]);
     render_items(f, app, chunks[2]);
+
+    // TODO ensure that 3 is always correct or pull the correct value that takes terminal resizing into account
+    app.update_height(chunks[2].height - 3);
 }
 
 fn render_help(f: &mut Frame, area: Rect) {

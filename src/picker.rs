@@ -9,7 +9,7 @@ use nucleo::{
     pattern::{CaseMatching, Normalization},
     Config, Injector, Nucleo, Snapshot,
 };
-use ratatui::{prelude::CrosstermBackend, Terminal};
+use ratatui::{layout::Rect, prelude::CrosstermBackend, Terminal};
 
 use crate::{selectable::Selectable, ui::ui};
 
@@ -19,6 +19,7 @@ pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 pub struct Picker<T: std::marker::Sync + std::marker::Send + 'static> {
     pub matcher: Nucleo<Selectable<T>>,
     pub current_index: u32,
+    pub height: u16,
     pub query: String,
 }
 
@@ -35,6 +36,7 @@ impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
         Picker {
             matcher,
             current_index: 0,
+            height: 0,
             query: String::new(),
         }
     }
@@ -57,6 +59,10 @@ impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
 
     pub fn items(&self) -> Vec<&Selectable<T>> {
         self.snapshot().matched_items(..).map(|i| i.data).collect()
+    }
+
+    pub(crate) fn update_height(&mut self, height: u16) {
+        self.height = height;
     }
 
     pub(crate) fn selected_items(&self) -> Vec<&T> {
@@ -88,10 +94,32 @@ impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
         self.current_index = (self.current_index + 1) % indices;
     }
 
+    fn next_page(&mut self) {
+        let indices = self.snapshot().matched_item_count();
+        if indices == 0 {
+            return;
+        }
+
+        let next_page_index = self.current_index + self.height as u32;
+        self.current_index = if next_page_index > indices {
+            indices
+        } else {
+            next_page_index
+        }
+    }
+
+    fn end(&mut self) {
+        let indices = self.snapshot().matched_item_count();
+        if indices == 0 {
+            return;
+        }
+
+        self.current_index = indices;
+    }
+
     pub fn previous(&mut self) {
         let indices = self.snapshot().matched_item_count();
-
-        if self.snapshot().matched_item_count() == 0 {
+        if indices == 0 {
             return;
         }
 
@@ -100,6 +128,24 @@ impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
         } else {
             self.current_index.saturating_sub(1)
         };
+    }
+
+    pub fn previous_page(&mut self) {
+        let indices = self.snapshot().matched_item_count();
+        if indices == 0 {
+            return;
+        }
+
+        self.current_index = self.current_index.saturating_sub(self.height as u32);
+    }
+
+    fn home(&mut self) {
+        let indices = self.snapshot().matched_item_count();
+        if indices == 0 {
+            return;
+        }
+
+        self.current_index = 0;
     }
 
     pub fn toggle_selected(&mut self) {
@@ -205,11 +251,24 @@ impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
                     (KeyCode::Down, KeyModifiers::NONE) => {
                         self.next();
                     }
+                    (KeyCode::PageDown, KeyModifiers::NONE) => {
+                        self.next_page();
+                    }
+                    (KeyCode::End, KeyModifiers::NONE) => {
+                        self.end();
+                    }
                     (KeyCode::Up, KeyModifiers::NONE) => {
                         self.previous();
                     }
+                    (KeyCode::PageUp, KeyModifiers::NONE) => {
+                        self.previous_page();
+                    }
+                    (KeyCode::Home, KeyModifiers::NONE) => {
+                        self.home();
+                    }
                     (KeyCode::Tab, KeyModifiers::NONE) => {
                         self.toggle_selected();
+                        self.next();
                     }
 
                     // ignore other key codes
