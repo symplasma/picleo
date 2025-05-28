@@ -5,9 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.2 (2025-05-28)
+
+### New Features
+
+ - <csr-id-6c5ffec02a9b3fa79f32bd0b3af00bfac60e5760/> Improve navigation controls
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 1 commit contributed to the release.
+ - 7 days passed between releases.
+ - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Improve navigation controls ([`6c5ffec`](https://github.com/symplasma/picleo/commit/6c5ffec02a9b3fa79f32bd0b3af00bfac60e5760))
+</details>
+
 ## v0.1.1 (2025-05-20)
 
 <csr-id-0d12ccbe8bcc3e7810813343b36f294b47e9d46a/>
+<csr-id-8f211607f28408986f6ceb72f9d111a4e14241c2/>
 
 ### New Features
 
@@ -29,7 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 10 commits contributed to the release over the course of 2 calendar days.
+ - 11 commits contributed to the release over the course of 2 calendar days.
  - 11 days passed between releases.
  - 4 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
@@ -41,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release picleo v0.1.1 ([`6dfe3b8`](https://github.com/symplasma/picleo/commit/6dfe3b8f351c9b4fa58d870efb39809d01b42120))
     - Add smart-release generated changelog ([`8f21160`](https://github.com/symplasma/picleo/commit/8f211607f28408986f6ceb72f9d111a4e14241c2))
     - Release picleo v0.1.1 ([`feff30a`](https://github.com/symplasma/picleo/commit/feff30a6100d932509f1f2d91cf9d33aab4b9aab))
     - Upgrade incompatible dependencies ([`d075281`](https://github.com/symplasma/picleo/commit/d075281f6a0758bf752f0107f28872a5fba194e7))
