@@ -1,15 +1,13 @@
 extern crate picleo;
 
-use std::fmt;
-use std::fs;
-use std::io::{self, BufRead};
-use std::path::PathBuf;
-
 use anyhow::Result;
 use clap::Parser;
-use picleo::selectable::Selectable;
-
-use picleo::picker::Picker;
+use picleo::{picker::Picker, selectable::SelectableItem};
+use std::{
+    fmt, fs,
+    io::{self, BufRead},
+    path::PathBuf,
+};
 
 // Wrapper for PathBuf that implements Display
 #[derive(Debug, Clone)]
@@ -58,7 +56,7 @@ fn main() -> Result<()> {
                 if let Ok(entries) = fs::read_dir(&dir) {
                     for entry in entries.flatten() {
                         let path = entry.path();
-                        i.push(Selectable::new(DisplayPath(path).clone()), |item, columns| columns[0] = item.to_string().into());
+                        i.push(SelectableItem::new(DisplayPath(path)), |item, columns| columns[0] = item.to_string().into());
                     }
                 }
             }
@@ -84,7 +82,7 @@ fn main() -> Result<()> {
             // Read from stdin
             // TODO: might want to handle read errors from stdin
             for line in io::stdin().lock().lines().map_while(Result::ok) {
-                i.push(Selectable::new(line.clone()), |item, columns| {
+                i.push(SelectableItem::new(line), |item, columns| {
                     columns[0] = item.to_string().into()
                 });
             }

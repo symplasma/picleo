@@ -1,5 +1,4 @@
-use std::{error, fmt::Display, io, sync::Arc};
-
+use crate::{selectable::SelectableItem, ui::ui};
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers},
     execute,
@@ -9,15 +8,17 @@ use nucleo::{
     pattern::{CaseMatching, Normalization},
     Config, Injector, Nucleo, Snapshot,
 };
-use ratatui::{layout::Rect, prelude::CrosstermBackend, Terminal};
-
-use crate::{selectable::Selectable, ui::ui};
+use ratatui::{prelude::CrosstermBackend, Terminal};
+use std::{error, fmt::Display, io, sync::Arc};
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
 // TODO convert static to a proper lifetime
-pub struct Picker<T: std::marker::Sync + std::marker::Send + 'static> {
-    pub matcher: Nucleo<Selectable<T>>,
+pub struct Picker<T>
+where
+    T: Sync + Send + 'static,
+{
+    pub matcher: Nucleo<SelectableItem<T>>,
     pub current_index: u32,
     pub height: u16,
     pub query: String,
@@ -30,7 +31,10 @@ impl<T: Sync + Send + Display> Default for Picker<T> {
 }
 
 // TODO maybe expose the Nucleo update callback
-impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
+impl<T> Picker<T>
+where
+    T: Sync + Send + Display,
+{
     pub fn new() -> Self {
         let matcher = Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
         Picker {
@@ -43,7 +47,7 @@ impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
 
     pub fn inject_items<F>(&self, f: F)
     where
-        F: FnOnce(&Injector<Selectable<T>>),
+        F: FnOnce(&Injector<SelectableItem<T>>),
     {
         let injector = self.matcher.injector();
         f(&injector);
@@ -53,11 +57,11 @@ impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
         self.matcher.tick(timeout);
     }
 
-    pub fn snapshot(&self) -> &Snapshot<Selectable<T>> {
+    pub fn snapshot(&self) -> &Snapshot<SelectableItem<T>> {
         self.matcher.snapshot()
     }
 
-    pub fn items(&self) -> Vec<&Selectable<T>> {
+    pub fn items(&self) -> Vec<&SelectableItem<T>> {
         self.snapshot().matched_items(..).map(|i| i.data).collect()
     }
 
@@ -235,6 +239,7 @@ impl<T: std::marker::Sync + std::marker::Send + std::fmt::Display> Picker<T> {
                     (KeyCode::Backspace, KeyModifiers::NONE) => {
                         self.delete_from_query();
                     }
+                    // TODO add more editing functions e.g. forward and back, forward delete, word forward/back
                     (KeyCode::Esc, KeyModifiers::NONE) => {
                         return Ok(vec![]);
                     }

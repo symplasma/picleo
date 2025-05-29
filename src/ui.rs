@@ -1,3 +1,4 @@
+use crate::picker::Picker;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
@@ -5,13 +6,12 @@ use ratatui::{
     widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame,
 };
+use std::fmt::Display;
 
-use crate::picker::Picker;
-
-pub fn ui<T: std::marker::Sync + std::marker::Send + std::fmt::Display>(
-    f: &mut Frame,
-    app: &mut Picker<T>,
-) {
+pub fn ui<T>(f: &mut Frame, app: &mut Picker<T>)
+where
+    T: Sync + Send + Display,
+{
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(2)
@@ -50,22 +50,20 @@ fn render_help(f: &mut Frame, area: Rect) {
     f.render_widget(paragraph, area);
 }
 
-fn render_search_input<T: std::marker::Sync + std::marker::Send>(
-    f: &mut Frame,
-    app: &Picker<T>,
-    area: Rect,
-) {
+fn render_search_input<T>(f: &mut Frame, app: &Picker<T>, area: Rect)
+where
+    T: Sync + Send,
+{
     let input = Paragraph::new(app.query.as_str())
         .style(Style::default())
         .block(Block::default().borders(Borders::ALL).title("Search"));
     f.render_widget(input, area);
 }
 
-fn render_items<T: std::marker::Sync + std::marker::Send + std::fmt::Display>(
-    f: &mut Frame,
-    app: &Picker<T>,
-    area: Rect,
-) {
+fn render_items<T>(f: &mut Frame, app: &Picker<T>, area: Rect)
+where
+    T: Sync + Send + Display,
+{
     let items: Vec<ListItem> = app
         .items()
         .iter()

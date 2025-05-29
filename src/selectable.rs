@@ -4,18 +4,18 @@ use std::{
 };
 
 #[derive(Debug)]
-pub struct Selectable<T> {
+pub struct SelectableItem<T> {
     value: T,
     selected: AtomicBool,
 }
 
-impl<T: Display> Display for Selectable<T> {
+impl<T: Display> Display for SelectableItem<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.value)
     }
 }
 
-impl<T> Selectable<T> {
+impl<T> SelectableItem<T> {
     // Create a new unselected instance
     pub fn new(value: T) -> Self {
         Self {
