@@ -54,7 +54,23 @@ fn render_search_input<T>(f: &mut Frame, app: &Picker<T>, area: Rect)
 where
     T: Sync + Send,
 {
-    let input = Paragraph::new(app.query.as_str())
+    // Split the query at the cursor position
+    let before_cursor = app.query.chars().take(app.query_index).collect::<String>();
+    let cursor_char = app.query.chars().nth(app.query_index).unwrap_or(' ');
+    let after_cursor = app
+        .query
+        .chars()
+        .skip(app.query_index + 1)
+        .collect::<String>();
+
+    // Create a line with styled spans for before, cursor, and after
+    let line = Line::from(vec![
+        Span::raw(before_cursor),
+        Span::styled(cursor_char.to_string(), Style::default().bg(Color::Blue)),
+        Span::raw(after_cursor),
+    ]);
+
+    let input = Paragraph::new(line)
         .style(Style::default())
         .block(Block::default().borders(Borders::ALL).title("Search"));
     f.render_widget(input, area);

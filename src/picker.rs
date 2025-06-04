@@ -22,6 +22,7 @@ where
     pub current_index: u32,
     pub height: u16,
     pub query: String,
+    pub query_index: usize,
 }
 
 impl<T: Sync + Send + Display> Default for Picker<T> {
@@ -42,6 +43,7 @@ where
             current_index: 0,
             height: 0,
             query: String::new(),
+            query_index: 0,
         }
     }
 
