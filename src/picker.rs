@@ -233,7 +233,8 @@ where
 
             if let Ok(Event::Key(key)) = event::read() {
                 match (key.code, key.modifiers) {
-                    (KeyCode::Char(key), KeyModifiers::NONE) => {
+                    (KeyCode::Char(key), KeyModifiers::NONE)
+                    | (KeyCode::Char(key), KeyModifiers::SHIFT) => {
                         self.append_to_query(key);
                     }
                     (KeyCode::Backspace, KeyModifiers::NONE) => {
