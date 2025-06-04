@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.3 (2025-06-04)
+
+### Chore
+
+ - <csr-id-e28dd409e829470a618f797a3bc39735635cbb07/> Remove todo comment
+
+### New Features
+
+ - <csr-id-84815245415a2863bbab4194701c6c2d544d6be7/> add Ctrl+K to delete from cursor to end of query
+ - <csr-id-de6b6f8cf04dac78b020f6f0a41487ffd740727a/> Add jump to beginning and end
+ - <csr-id-abd9a43d780cad00f034968c2f4235ef5c78c565/> Allow Alt as a motion modifier
+   Users can use Ctrl or Alt to move or delete forward or backward a word at a time (based on whitespace).
+ - <csr-id-ba9d2bca22c21e42e711a2aa08c889a2d750b4cf/> add word deletion with Ctrl+Backspace and Ctrl+Delete
+ - <csr-id-d66ca929c88dc4d91acd499c8819d291ba0e49e8/> add word navigation with Ctrl+Left/Right arrow keys
+ - <csr-id-7f0f1e37150ba16837b74982e0f3053bb87f3df6/> Add user control of cursor position
+ - <csr-id-c870a5d4bab8a9a11ed4ea5a2d56a5339676fcba/> Add cursor movement
+ - <csr-id-03a0ca2f1430d555bb58d2bbed4e7eaf97833f1e/> add blue block cursor to search input rendering
+
+### Bug Fixes
+
+ - <csr-id-eb2593acd882410ba3bea3cbcba37d7c8697cb56/> Allow typing upper case chars
+
+### Refactor
+
+ - <csr-id-c53acba0facdf7ea7f5d53e00120fd4f8c8d0859/> modify query editing to respect cursor position
+ - <csr-id-27e1d7aa90e9d99578bf984ffd02af4e6a8a947a/> Cleanup names and remove cloning
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 12 commits contributed to the release over the course of 6 calendar days.
+ - 7 days passed between releases.
+ - 12 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Add Ctrl+K to delete from cursor to end of query ([`8481524`](https://github.com/symplasma/picleo/commit/84815245415a2863bbab4194701c6c2d544d6be7))
+    - Add jump to beginning and end ([`de6b6f8`](https://github.com/symplasma/picleo/commit/de6b6f8cf04dac78b020f6f0a41487ffd740727a))
+    - Remove todo comment ([`e28dd40`](https://github.com/symplasma/picleo/commit/e28dd409e829470a618f797a3bc39735635cbb07))
+    - Modify query editing to respect cursor position ([`c53acba`](https://github.com/symplasma/picleo/commit/c53acba0facdf7ea7f5d53e00120fd4f8c8d0859))
+    - Allow Alt as a motion modifier ([`abd9a43`](https://github.com/symplasma/picleo/commit/abd9a43d780cad00f034968c2f4235ef5c78c565))
+    - Add word deletion with Ctrl+Backspace and Ctrl+Delete ([`ba9d2bc`](https://github.com/symplasma/picleo/commit/ba9d2bca22c21e42e711a2aa08c889a2d750b4cf))
+    - Add word navigation with Ctrl+Left/Right arrow keys ([`d66ca92`](https://github.com/symplasma/picleo/commit/d66ca929c88dc4d91acd499c8819d291ba0e49e8))
+    - Add user control of cursor position ([`7f0f1e3`](https://github.com/symplasma/picleo/commit/7f0f1e37150ba16837b74982e0f3053bb87f3df6))
+    - Add cursor movement ([`c870a5d`](https://github.com/symplasma/picleo/commit/c870a5d4bab8a9a11ed4ea5a2d56a5339676fcba))
+    - Add blue block cursor to search input rendering ([`03a0ca2`](https://github.com/symplasma/picleo/commit/03a0ca2f1430d555bb58d2bbed4e7eaf97833f1e))
+    - Allow typing upper case chars ([`eb2593a`](https://github.com/symplasma/picleo/commit/eb2593acd882410ba3bea3cbcba37d7c8697cb56))
+    - Cleanup names and remove cloning ([`27e1d7a`](https://github.com/symplasma/picleo/commit/27e1d7aa90e9d99578bf984ffd02af4e6a8a947a))
+</details>
+
 ## v0.1.2 (2025-05-28)
 
 ### New Features
@@ -15,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 1 commit contributed to the release.
+ - 2 commits contributed to the release.
  - 7 days passed between releases.
  - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
@@ -27,6 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release picleo v0.1.2 ([`a06bbf8`](https://github.com/symplasma/picleo/commit/a06bbf8ebc986281eba28725068cad9f2622dde1))
     - Improve navigation controls ([`6c5ffec`](https://github.com/symplasma/picleo/commit/6c5ffec02a9b3fa79f32bd0b3af00bfac60e5760))
 </details>
 
