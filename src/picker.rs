@@ -447,7 +447,6 @@ where
                     | (KeyCode::Delete, KeyModifiers::ALT) => {
                         self.delete_word_forward();
                     }
-                    // TODO add more editing functions e.g. forward delete
                     (KeyCode::Esc, KeyModifiers::NONE) => {
                         return Ok(vec![]);
                     }
