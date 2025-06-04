@@ -246,6 +246,14 @@ where
                         // NOTE: this needs to saturate to handle deleting when the query is empty
                         self.query_index = self.query_index.saturating_sub(1);
                     }
+                    (KeyCode::Right, KeyModifiers::NONE) => {
+                        // NOTE: this probably doesn't need to saturate, that would require an absurdly long query
+                        self.query_index = self.query_index.saturating_add(1);
+                    }
+                    (KeyCode::Left, KeyModifiers::NONE) => {
+                        // NOTE: this needs to saturate to handle deleting when the query is empty
+                        self.query_index = self.query_index.saturating_sub(1);
+                    }
                     // TODO add more editing functions e.g. forward and back, forward delete, word forward/back
                     (KeyCode::Esc, KeyModifiers::NONE) => {
                         return Ok(vec![]);
