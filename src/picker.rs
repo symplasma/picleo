@@ -457,6 +457,12 @@ where
                     (KeyCode::Char('c'), KeyModifiers::CONTROL) => {
                         return Ok(vec![]);
                     }
+                    (KeyCode::Char('a'), KeyModifiers::CONTROL) => {
+                        self.query_index = 0;
+                    }
+                    (KeyCode::Char('e'), KeyModifiers::CONTROL) => {
+                        self.query_index = self.query.len();
+                    }
                     (KeyCode::Enter, KeyModifiers::NONE) => {
                         // Print selected items and exit
                         return Ok(self.selected_items());
