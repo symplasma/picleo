@@ -169,7 +169,11 @@ where
 
     pub(crate) fn append_to_query(&mut self, key: char) {
         // TODO constrain selected item to match range
-        self.query.push(key);
+        if self.query_index >= self.query.len() {
+            self.query.push(key);
+        } else {
+            self.query.insert(self.query_index, key);
+        }
         self.matcher.pattern.reparse(
             0,
             &self.query,
@@ -350,7 +354,10 @@ where
     }
 
     pub(crate) fn delete_from_query(&mut self) {
-        self.query.pop();
+        if self.query_index > 0 && !self.query.is_empty() {
+            // Remove the character before the cursor
+            self.query.remove(self.query_index - 1);
+        }
         self.matcher.pattern.reparse(
             0,
             &self.query,
