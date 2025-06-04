@@ -187,10 +187,10 @@ where
 
         // Start from current position
         let remaining = &self.query[self.query_index..];
-        
+
         // Find the next word boundary
         let mut chars = remaining.char_indices();
-        
+
         // Skip the current word if we're in the middle of one
         while let Some((i, c)) = chars.next() {
             if c.is_whitespace() {
@@ -202,7 +202,7 @@ where
                 return;
             }
         }
-        
+
         // Skip any whitespace
         let mut word_start = 0;
         while let Some((i, c)) = chars.next() {
@@ -216,7 +216,7 @@ where
                 return;
             }
         }
-        
+
         // Move to the start of the next word
         self.query_index += word_start;
     }
@@ -228,26 +228,26 @@ where
 
         // Get the part of the query before the current position
         let before_cursor = &self.query[..self.query_index];
-        
+
         // Find the previous word boundary
         let chars: Vec<char> = before_cursor.chars().collect();
         let mut pos = chars.len() - 1;
-        
+
         // Skip any whitespace before the cursor
         while pos > 0 && chars[pos].is_whitespace() {
             pos -= 1;
         }
-        
+
         // Skip the current word
         while pos > 0 && !chars[pos].is_whitespace() {
             pos -= 1;
         }
-        
+
         // If we stopped at whitespace and we're not at the beginning, move to the next char
         if pos > 0 && chars[pos].is_whitespace() {
             pos += 1;
         }
-        
+
         self.query_index = pos;
     }
 
@@ -258,30 +258,30 @@ where
 
         // Get the part of the query before the current position
         let before_cursor = &self.query[..self.query_index];
-        
+
         // Find the previous word boundary
         let chars: Vec<char> = before_cursor.chars().collect();
         let mut pos = chars.len() - 1;
-        
+
         // Skip any whitespace before the cursor
         while pos > 0 && chars[pos].is_whitespace() {
             pos -= 1;
         }
-        
+
         // Skip the current word
         while pos > 0 && !chars[pos].is_whitespace() {
             pos -= 1;
         }
-        
+
         // If we stopped at whitespace and we're not at the beginning, move to the next char
         if pos > 0 && chars[pos].is_whitespace() {
             pos += 1;
         }
-        
+
         // Remove the characters between the new position and the old cursor position
         self.query = format!("{}{}", &self.query[..pos], &self.query[self.query_index..]);
         self.query_index = pos;
-        
+
         // Update the matcher
         self.matcher.pattern.reparse(
             0,
@@ -300,11 +300,11 @@ where
 
         // Start from current position
         let remaining = &self.query[self.query_index..];
-        
+
         // Find the next word boundary
         let mut chars = remaining.char_indices();
         let mut end_pos = query_len;
-        
+
         // If we're at the beginning of a word, delete that word
         if let Some((_, first_char)) = chars.next() {
             if !first_char.is_whitespace() {
@@ -331,10 +331,14 @@ where
                 }
             }
         }
-        
+
         // Remove the characters between the cursor position and the end position
-        self.query = format!("{}{}", &self.query[..self.query_index], &self.query[end_pos..]);
-        
+        self.query = format!(
+            "{}{}",
+            &self.query[..self.query_index],
+            &self.query[end_pos..]
+        );
+
         // Update the matcher
         self.matcher.pattern.reparse(
             0,
@@ -412,24 +416,28 @@ where
                         // NOTE: this needs to saturate to handle deleting when the query is empty
                         self.query_index = self.query_index.saturating_sub(1);
                     }
-                    (KeyCode::Backspace, KeyModifiers::CONTROL) => {
+                    // TODO find out if it's a local keybinding that's preventing `Ctrl + Backspace` from working or if it's actually a bug
+                    (KeyCode::Backspace, KeyModifiers::CONTROL)
+                    | (KeyCode::Backspace, KeyModifiers::ALT) => {
                         self.delete_word_backward();
                     }
                     (KeyCode::Right, KeyModifiers::NONE) => {
                         // NOTE: this probably doesn't need to saturate, that would require an absurdly long query
                         self.query_index = self.query_index.saturating_add(1);
                     }
-                    (KeyCode::Right, KeyModifiers::CONTROL) => {
+                    (KeyCode::Right, KeyModifiers::CONTROL)
+                    | (KeyCode::Right, KeyModifiers::ALT) => {
                         self.jump_word_forward();
                     }
                     (KeyCode::Left, KeyModifiers::NONE) => {
                         // NOTE: this needs to saturate to handle deleting when the query is empty
                         self.query_index = self.query_index.saturating_sub(1);
                     }
-                    (KeyCode::Left, KeyModifiers::CONTROL) => {
+                    (KeyCode::Left, KeyModifiers::CONTROL) | (KeyCode::Left, KeyModifiers::ALT) => {
                         self.jump_word_backward();
                     }
-                    (KeyCode::Delete, KeyModifiers::CONTROL) => {
+                    (KeyCode::Delete, KeyModifiers::CONTROL)
+                    | (KeyCode::Delete, KeyModifiers::ALT) => {
                         self.delete_word_forward();
                     }
                     // TODO add more editing functions e.g. forward delete
