@@ -251,6 +251,100 @@ where
         self.query_index = pos;
     }
 
+    pub(crate) fn delete_word_backward(&mut self) {
+        if self.query_index == 0 {
+            return;
+        }
+
+        // Get the part of the query before the current position
+        let before_cursor = &self.query[..self.query_index];
+        
+        // Find the previous word boundary
+        let chars: Vec<char> = before_cursor.chars().collect();
+        let mut pos = chars.len() - 1;
+        
+        // Skip any whitespace before the cursor
+        while pos > 0 && chars[pos].is_whitespace() {
+            pos -= 1;
+        }
+        
+        // Skip the current word
+        while pos > 0 && !chars[pos].is_whitespace() {
+            pos -= 1;
+        }
+        
+        // If we stopped at whitespace and we're not at the beginning, move to the next char
+        if pos > 0 && chars[pos].is_whitespace() {
+            pos += 1;
+        }
+        
+        // Remove the characters between the new position and the old cursor position
+        self.query = format!("{}{}", &self.query[..pos], &self.query[self.query_index..]);
+        self.query_index = pos;
+        
+        // Update the matcher
+        self.matcher.pattern.reparse(
+            0,
+            &self.query,
+            CaseMatching::Smart,
+            Normalization::Smart,
+            false,
+        );
+    }
+
+    pub(crate) fn delete_word_forward(&mut self) {
+        let query_len = self.query.len();
+        if self.query_index >= query_len {
+            return;
+        }
+
+        // Start from current position
+        let remaining = &self.query[self.query_index..];
+        
+        // Find the next word boundary
+        let mut chars = remaining.char_indices();
+        let mut end_pos = query_len;
+        
+        // If we're at the beginning of a word, delete that word
+        if let Some((_, first_char)) = chars.next() {
+            if !first_char.is_whitespace() {
+                // Skip until we hit whitespace or end
+                while let Some((i, c)) = chars.next() {
+                    if c.is_whitespace() {
+                        end_pos = self.query_index + i;
+                        break;
+                    }
+                }
+            } else {
+                // Skip whitespace
+                while let Some((i, c)) = chars.next() {
+                    if !c.is_whitespace() {
+                        // Then skip until next whitespace or end
+                        while let Some((j, c2)) = chars.next() {
+                            if c2.is_whitespace() {
+                                end_pos = self.query_index + j;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Remove the characters between the cursor position and the end position
+        self.query = format!("{}{}", &self.query[..self.query_index], &self.query[end_pos..]);
+        
+        // Update the matcher
+        self.matcher.pattern.reparse(
+            0,
+            &self.query,
+            CaseMatching::Smart,
+            Normalization::Smart,
+            false,
+        );
+    }
+
     pub(crate) fn delete_from_query(&mut self) {
         self.query.pop();
         self.matcher.pattern.reparse(
@@ -318,6 +412,9 @@ where
                         // NOTE: this needs to saturate to handle deleting when the query is empty
                         self.query_index = self.query_index.saturating_sub(1);
                     }
+                    (KeyCode::Backspace, KeyModifiers::CONTROL) => {
+                        self.delete_word_backward();
+                    }
                     (KeyCode::Right, KeyModifiers::NONE) => {
                         // NOTE: this probably doesn't need to saturate, that would require an absurdly long query
                         self.query_index = self.query_index.saturating_add(1);
@@ -332,7 +429,10 @@ where
                     (KeyCode::Left, KeyModifiers::CONTROL) => {
                         self.jump_word_backward();
                     }
-                    // TODO add more editing functions e.g. forward delete, word forward/back
+                    (KeyCode::Delete, KeyModifiers::CONTROL) => {
+                        self.delete_word_forward();
+                    }
+                    // TODO add more editing functions e.g. forward delete
                     (KeyCode::Esc, KeyModifiers::NONE) => {
                         return Ok(vec![]);
                     }
