@@ -353,6 +353,24 @@ where
         );
     }
 
+    pub(crate) fn delete_to_end(&mut self) {
+        if self.query_index >= self.query.len() {
+            return;
+        }
+
+        // Truncate the query at the cursor position
+        self.query.truncate(self.query_index);
+        
+        // Update the matcher
+        self.matcher.pattern.reparse(
+            0,
+            &self.query,
+            CaseMatching::Smart,
+            Normalization::Smart,
+            false,
+        );
+    }
+
     pub(crate) fn delete_from_query(&mut self) {
         if self.query_index > 0 && !self.query.is_empty() {
             // Remove the character before the cursor
@@ -462,6 +480,9 @@ where
                     }
                     (KeyCode::Char('e'), KeyModifiers::CONTROL) => {
                         self.query_index = self.query.len();
+                    }
+                    (KeyCode::Char('k'), KeyModifiers::CONTROL) => {
+                        self.delete_to_end();
                     }
                     (KeyCode::Enter, KeyModifiers::NONE) => {
                         // Print selected items and exit
