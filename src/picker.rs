@@ -238,9 +238,13 @@ where
                     (KeyCode::Char(key), KeyModifiers::NONE)
                     | (KeyCode::Char(key), KeyModifiers::SHIFT) => {
                         self.append_to_query(key);
+                        // NOTE: this probably doesn't need to saturate, that would require an absurdly long query
+                        self.query_index = self.query_index.saturating_add(1);
                     }
                     (KeyCode::Backspace, KeyModifiers::NONE) => {
                         self.delete_from_query();
+                        // NOTE: this needs to saturate to handle deleting when the query is empty
+                        self.query_index = self.query_index.saturating_sub(1);
                     }
                     // TODO add more editing functions e.g. forward and back, forward delete, word forward/back
                     (KeyCode::Esc, KeyModifiers::NONE) => {
@@ -248,6 +252,7 @@ where
                     }
                     (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
                         self.clear_query();
+                        self.query_index = 0;
                     }
                     (KeyCode::Char('c'), KeyModifiers::CONTROL) => {
                         return Ok(vec![]);
