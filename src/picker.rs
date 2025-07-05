@@ -361,7 +361,7 @@ where
                 }
             } else {
                 // Skip whitespace
-                while let Some((i, c)) = chars.next() {
+                while let Some((_i, c)) = chars.next() {
                     if !c.is_whitespace() {
                         // Then skip until next whitespace or end
                         while let Some((j, c2)) = chars.next() {

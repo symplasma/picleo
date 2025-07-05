@@ -25,7 +25,7 @@ where
         )
         .split(f.area());
 
-    render_help(f, chunks[0], &app.running_threads(), &app.item_count());
+    render_help(f, chunks[0], app);
     render_search_input(f, app, chunks[1]);
     render_items(f, app, chunks[2]);
 
@@ -33,7 +33,11 @@ where
     app.update_height(chunks[2].height - 3);
 }
 
-fn render_help(f: &mut Frame, area: Rect, running_indexers: &usize, item_count: &u32) {
+fn render_help<T>(f: &mut Frame, area: Rect, app: &Picker<T>)
+where
+    T: Sync + Send + Display,
+{
+    let snapshot = app.snapshot();
     let text = vec![Line::from(vec![
         Span::raw("Press "),
         Span::styled("↑/↓", Style::default().add_modifier(Modifier::BOLD)),
@@ -46,13 +50,17 @@ fn render_help(f: &mut Frame, area: Rect, running_indexers: &usize, item_count: 
         Span::raw(" to quit,"),
         Span::raw(" matching against "),
         Span::styled(
-            item_count.to_string(),
+            format!(
+                "{}/{}",
+                snapshot.matched_item_count(),
+                snapshot.item_count()
+            ),
             Style::default().add_modifier(Modifier::BOLD),
         ),
         Span::raw(" items,"),
         Span::raw(" ("),
         Span::styled(
-            running_indexers.to_string(),
+            app.running_threads().to_string(),
             Style::default().add_modifier(Modifier::BOLD),
         ),
         Span::raw(" threads still indexing)"),
