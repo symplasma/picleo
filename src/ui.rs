@@ -96,12 +96,12 @@ where
     f.render_widget(input, area);
 }
 
-fn render_items<T>(f: &mut Frame, app: &Picker<T>, area: Rect)
+fn render_items<T>(f: &mut Frame, app: &mut Picker<T>, area: Rect)
 where
     T: Sync + Send + Display,
 {
     let items: Vec<ListItem> = app
-        .items()
+        .matched_items()
         .iter()
         .map(|item| {
             let is_selected = item.is_selected();

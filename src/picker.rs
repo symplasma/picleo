@@ -9,7 +9,9 @@ use nucleo::{
     Config, Injector, Nucleo, Snapshot,
 };
 use ratatui::{prelude::CrosstermBackend, Terminal};
-use std::{error, fmt::Display, io, sync::Arc, thread::JoinHandle, time::Duration};
+use std::{
+    error, fmt::Display, io, iter::once, ops::Range, sync::Arc, thread::JoinHandle, time::Duration,
+};
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
@@ -19,6 +21,7 @@ where
     T: Sync + Send + 'static,
 {
     pub matcher: Nucleo<SelectableItem<T>>,
+    pub first_visible_item_index: u32,
     pub current_index: u32,
     pub height: u16,
     pub query: String,
@@ -41,6 +44,7 @@ where
         let matcher = Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
         Picker {
             matcher,
+            first_visible_item_index: 0,
             current_index: 0,
             height: 0,
             query: String::new(),
@@ -103,8 +107,38 @@ where
         self.matcher.snapshot()
     }
 
-    pub fn items(&self) -> Vec<&SelectableItem<T>> {
-        self.snapshot().matched_items(..).map(|i| i.data).collect()
+    pub(crate) fn first_visible_item_index(&self) -> u32 {
+        self.first_visible_item_index
+    }
+
+    pub(crate) fn last_visible_item_index(&self) -> u32 {
+        self.first_visible_item_index + self.height as u32
+    }
+
+    pub(crate) fn visible_item_range(&mut self) -> Range<u32> {
+        let current_index = self.current_index;
+
+        match (self.first_visible_item_index()..self.last_visible_item_index())
+            .cmp(once(current_index))
+        {
+            std::cmp::Ordering::Less => {
+                self.first_visible_item_index = self.first_visible_item_index()
+                    + (current_index.saturating_sub(self.last_visible_item_index()))
+            }
+            std::cmp::Ordering::Equal => {}
+            std::cmp::Ordering::Greater => self.first_visible_item_index = self.current_index,
+        };
+
+        self.first_visible_item_index()..self.last_visible_item_index()
+    }
+
+    pub fn matched_items(&mut self) -> Vec<&SelectableItem<T>> {
+        let visible_item_range = self.visible_item_range();
+        self.snapshot()
+            // is important to restrict this to the visible range or things get really slow with lots of items
+            .matched_items(visible_item_range)
+            .map(|i| i.data)
+            .collect()
     }
 
     pub(crate) fn update_height(&mut self, height: u16) {
