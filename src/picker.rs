@@ -373,7 +373,7 @@ where
 
         // Truncate the query at the cursor position
         self.query.truncate(self.query_index);
-        
+
         // Update the matcher
         self.matcher.pattern.reparse(
             0,

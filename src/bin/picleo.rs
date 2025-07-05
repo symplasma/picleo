@@ -37,6 +37,10 @@ struct Args {
     /// Directories to list files from
     #[arg(name = "DIRS")]
     dirs: Vec<PathBuf>,
+
+    /// Recursively index files in directories
+    #[arg(short, long)]
+    recursive: bool,
 }
 
 fn main() -> Result<()> {
@@ -48,19 +52,43 @@ fn main() -> Result<()> {
         // Create app state
         let mut picker = Picker::<DisplayPath>::new();
 
-        picker.inject_items(|i|
+        picker.inject_items(|i| {
             // List files from directories
             for dir in args.dirs {
-                // TODO: might want to do something about errors here instead of silently ignoring them
-                // .with_context(|| format!("Failed to read directory: {}", dir.display()))?;
-                if let Ok(entries) = fs::read_dir(&dir) {
-                    for entry in entries.flatten() {
-                        let path = entry.path();
-                        i.push(SelectableItem::new(DisplayPath(path)), |item, columns| columns[0] = item.to_string().into());
+                if args.recursive {
+                    // Recursively walk the directory
+                    fn walk_dir(
+                        dir: &PathBuf,
+                        injector: &nucleo::Injector<SelectableItem<DisplayPath>>,
+                    ) {
+                        if let Ok(entries) = fs::read_dir(dir) {
+                            for entry in entries.flatten() {
+                                let path = entry.path();
+                                if path.is_dir() {
+                                    walk_dir(&path, injector);
+                                } else {
+                                    injector.push(
+                                        SelectableItem::new(DisplayPath(path)),
+                                        |item, columns| columns[0] = item.to_string().into(),
+                                    );
+                                }
+                            }
+                        }
+                    }
+                    walk_dir(&dir, i);
+                } else {
+                    // Non-recursive: only list direct children
+                    if let Ok(entries) = fs::read_dir(&dir) {
+                        for entry in entries.flatten() {
+                            let path = entry.path();
+                            i.push(SelectableItem::new(DisplayPath(path)), |item, columns| {
+                                columns[0] = item.to_string().into()
+                            });
+                        }
                     }
                 }
             }
-        );
+        });
 
         // Run app
         match picker.run() {
