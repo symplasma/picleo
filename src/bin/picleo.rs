@@ -41,6 +41,10 @@ struct Args {
     /// Recursively index files in directories
     #[arg(short, long)]
     recursive: bool,
+
+    /// Use threaded injection for better performance
+    #[arg(short, long)]
+    threaded: bool,
 }
 
 fn main() -> Result<()> {
@@ -54,15 +58,27 @@ fn main() -> Result<()> {
 
         // List files from directories
         for dir in args.dirs {
-            picker.inject_items(|i| {
-                if args.recursive {
-                    // Recursively walk the directory
-                    walk_dir_recursive(&dir, i);
-                } else {
-                    // Non-recursive: only list direct children
-                    walk_dir(dir, i);
-                }
-            });
+            if args.threaded {
+                picker.inject_items_threaded(|i| {
+                    if args.recursive {
+                        // Recursively walk the directory
+                        walk_dir_recursive(&dir, i);
+                    } else {
+                        // Non-recursive: only list direct children
+                        walk_dir(dir, i);
+                    }
+                });
+            } else {
+                picker.inject_items(|i| {
+                    if args.recursive {
+                        // Recursively walk the directory
+                        walk_dir_recursive(&dir, i);
+                    } else {
+                        // Non-recursive: only list direct children
+                        walk_dir(dir, i);
+                    }
+                });
+            }
         }
 
         // Run app
@@ -81,15 +97,27 @@ fn main() -> Result<()> {
         // Create app state
         let mut picker = Picker::<String>::new();
 
-        picker.inject_items(|i| {
-            // Read from stdin
-            // TODO: might want to handle read errors from stdin
-            for line in io::stdin().lock().lines().map_while(Result::ok) {
-                i.push(SelectableItem::new(line), |item, columns| {
-                    columns[0] = item.to_string().into()
-                });
-            }
-        });
+        if args.threaded {
+            picker.inject_items_threaded(|i| {
+                // Read from stdin
+                // TODO: might want to handle read errors from stdin
+                for line in io::stdin().lock().lines().map_while(Result::ok) {
+                    i.push(SelectableItem::new(line), |item, columns| {
+                        columns[0] = item.to_string().into()
+                    });
+                }
+            });
+        } else {
+            picker.inject_items(|i| {
+                // Read from stdin
+                // TODO: might want to handle read errors from stdin
+                for line in io::stdin().lock().lines().map_while(Result::ok) {
+                    i.push(SelectableItem::new(line), |item, columns| {
+                        columns[0] = item.to_string().into()
+                    });
+                }
+            });
+        }
 
         // Run app
         match picker.run() {
