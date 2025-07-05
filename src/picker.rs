@@ -9,7 +9,7 @@ use nucleo::{
     Config, Injector, Nucleo, Snapshot,
 };
 use ratatui::{prelude::CrosstermBackend, Terminal};
-use std::{error, fmt::Display, io, sync::Arc};
+use std::{error, fmt::Display, io, sync::Arc, thread::JoinHandle};
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
@@ -23,6 +23,7 @@ where
     pub height: u16,
     pub query: String,
     pub query_index: usize,
+    pub join_handles: Vec<JoinHandle<()>>,
 }
 
 impl<T: Sync + Send + Display> Default for Picker<T> {
@@ -44,6 +45,7 @@ where
             height: 0,
             query: String::new(),
             query_index: 0,
+            join_handles: Vec::new(),
         }
     }
 
@@ -53,6 +55,17 @@ where
     {
         let injector = self.matcher.injector();
         f(&injector);
+    }
+
+    pub fn inject_items_threaded<F>(&mut self, f: F)
+    where
+        F: FnOnce(&Injector<SelectableItem<T>>) + Send + 'static,
+    {
+        let injector = self.matcher.injector();
+        let handle = std::thread::spawn(move || {
+            f(&injector);
+        });
+        self.join_handles.push(handle);
     }
 
     pub fn tick(&mut self, timeout: u64) {
