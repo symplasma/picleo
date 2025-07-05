@@ -9,7 +9,7 @@ use nucleo::{
     Config, Injector, Nucleo, Snapshot,
 };
 use ratatui::{prelude::CrosstermBackend, Terminal};
-use std::{error, fmt::Display, io, sync::Arc, thread::JoinHandle};
+use std::{error, fmt::Display, io, sync::Arc, thread::JoinHandle, time::Duration};
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
@@ -468,93 +468,98 @@ where
             self.tick(10);
             terminal.draw(|f| ui(f, self))?;
 
-            if let Ok(Event::Key(key)) = event::read() {
-                match (key.code, key.modifiers) {
-                    (KeyCode::Char(key), KeyModifiers::NONE)
-                    | (KeyCode::Char(key), KeyModifiers::SHIFT) => {
-                        self.append_to_query(key);
-                        // NOTE: this probably doesn't need to saturate, that would require an absurdly long query
-                        self.query_index = self.query_index.saturating_add(1);
-                    }
-                    (KeyCode::Backspace, KeyModifiers::NONE) => {
-                        self.delete_from_query();
-                        // NOTE: this needs to saturate to handle deleting when the query is empty
-                        self.query_index = self.query_index.saturating_sub(1);
-                    }
-                    // TODO find out if it's a local keybinding that's preventing `Ctrl + Backspace` from working or if it's actually a bug
-                    (KeyCode::Backspace, KeyModifiers::CONTROL)
-                    | (KeyCode::Backspace, KeyModifiers::ALT) => {
-                        self.delete_word_backward();
-                    }
-                    (KeyCode::Right, KeyModifiers::NONE) => {
-                        // NOTE: this probably doesn't need to saturate, that would require an absurdly long query
-                        self.query_index = self.query_index.saturating_add(1);
-                    }
-                    (KeyCode::Right, KeyModifiers::CONTROL)
-                    | (KeyCode::Right, KeyModifiers::ALT) => {
-                        self.jump_word_forward();
-                    }
-                    (KeyCode::Left, KeyModifiers::NONE) => {
-                        // NOTE: this needs to saturate to handle deleting when the query is empty
-                        self.query_index = self.query_index.saturating_sub(1);
-                    }
-                    (KeyCode::Left, KeyModifiers::CONTROL) | (KeyCode::Left, KeyModifiers::ALT) => {
-                        self.jump_word_backward();
-                    }
-                    (KeyCode::Delete, KeyModifiers::CONTROL)
-                    | (KeyCode::Delete, KeyModifiers::ALT) => {
-                        self.delete_word_forward();
-                    }
-                    (KeyCode::Esc, KeyModifiers::NONE) => {
-                        return Ok(vec![]);
-                    }
-                    (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
-                        self.clear_query();
-                        self.query_index = 0;
-                    }
-                    (KeyCode::Char('c'), KeyModifiers::CONTROL) => {
-                        return Ok(vec![]);
-                    }
-                    (KeyCode::Char('a'), KeyModifiers::CONTROL) => {
-                        self.query_index = 0;
-                    }
-                    (KeyCode::Char('e'), KeyModifiers::CONTROL) => {
-                        self.query_index = self.query.len();
-                    }
-                    (KeyCode::Char('k'), KeyModifiers::CONTROL) => {
-                        self.delete_to_end();
-                    }
-                    (KeyCode::Enter, KeyModifiers::NONE) => {
-                        // Print selected items and exit
-                        return Ok(self.selected_items());
-                    }
-                    (KeyCode::Down, KeyModifiers::NONE) => {
-                        self.next();
-                    }
-                    (KeyCode::PageDown, KeyModifiers::NONE) => {
-                        self.next_page();
-                    }
-                    (KeyCode::End, KeyModifiers::NONE) => {
-                        self.end();
-                    }
-                    (KeyCode::Up, KeyModifiers::NONE) => {
-                        self.previous();
-                    }
-                    (KeyCode::PageUp, KeyModifiers::NONE) => {
-                        self.previous_page();
-                    }
-                    (KeyCode::Home, KeyModifiers::NONE) => {
-                        self.home();
-                    }
-                    (KeyCode::Tab, KeyModifiers::NONE) => {
-                        self.toggle_selected();
-                        self.next();
-                    }
+            // ensure that we update the UI, even when we aren't receiving events from the user
+            if event::poll(Duration::from_millis(16))? {
+                // read the event that is ready (normally read blocks, but we're polling until it's ready)
+                if let Ok(Event::Key(key)) = event::read() {
+                    match (key.code, key.modifiers) {
+                        (KeyCode::Char(key), KeyModifiers::NONE)
+                        | (KeyCode::Char(key), KeyModifiers::SHIFT) => {
+                            self.append_to_query(key);
+                            // NOTE: this probably doesn't need to saturate, that would require an absurdly long query
+                            self.query_index = self.query_index.saturating_add(1);
+                        }
+                        (KeyCode::Backspace, KeyModifiers::NONE) => {
+                            self.delete_from_query();
+                            // NOTE: this needs to saturate to handle deleting when the query is empty
+                            self.query_index = self.query_index.saturating_sub(1);
+                        }
+                        // TODO find out if it's a local keybinding that's preventing `Ctrl + Backspace` from working or if it's actually a bug
+                        (KeyCode::Backspace, KeyModifiers::CONTROL)
+                        | (KeyCode::Backspace, KeyModifiers::ALT) => {
+                            self.delete_word_backward();
+                        }
+                        (KeyCode::Right, KeyModifiers::NONE) => {
+                            // NOTE: this probably doesn't need to saturate, that would require an absurdly long query
+                            self.query_index = self.query_index.saturating_add(1);
+                        }
+                        (KeyCode::Right, KeyModifiers::CONTROL)
+                        | (KeyCode::Right, KeyModifiers::ALT) => {
+                            self.jump_word_forward();
+                        }
+                        (KeyCode::Left, KeyModifiers::NONE) => {
+                            // NOTE: this needs to saturate to handle deleting when the query is empty
+                            self.query_index = self.query_index.saturating_sub(1);
+                        }
+                        (KeyCode::Left, KeyModifiers::CONTROL)
+                        | (KeyCode::Left, KeyModifiers::ALT) => {
+                            self.jump_word_backward();
+                        }
+                        (KeyCode::Delete, KeyModifiers::CONTROL)
+                        | (KeyCode::Delete, KeyModifiers::ALT) => {
+                            self.delete_word_forward();
+                        }
+                        (KeyCode::Esc, KeyModifiers::NONE) => {
+                            return Ok(vec![]);
+                        }
+                        (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
+                            self.clear_query();
+                            self.query_index = 0;
+                        }
+                        (KeyCode::Char('c'), KeyModifiers::CONTROL) => {
+                            return Ok(vec![]);
+                        }
+                        (KeyCode::Char('a'), KeyModifiers::CONTROL) => {
+                            self.query_index = 0;
+                        }
+                        (KeyCode::Char('e'), KeyModifiers::CONTROL) => {
+                            self.query_index = self.query.len();
+                        }
+                        (KeyCode::Char('k'), KeyModifiers::CONTROL) => {
+                            self.delete_to_end();
+                        }
+                        (KeyCode::Enter, KeyModifiers::NONE) => {
+                            // Print selected items and exit
+                            return Ok(self.selected_items());
+                        }
+                        (KeyCode::Down, KeyModifiers::NONE) => {
+                            self.next();
+                        }
+                        (KeyCode::PageDown, KeyModifiers::NONE) => {
+                            self.next_page();
+                        }
+                        (KeyCode::End, KeyModifiers::NONE) => {
+                            self.end();
+                        }
+                        (KeyCode::Up, KeyModifiers::NONE) => {
+                            self.previous();
+                        }
+                        (KeyCode::PageUp, KeyModifiers::NONE) => {
+                            self.previous_page();
+                        }
+                        (KeyCode::Home, KeyModifiers::NONE) => {
+                            self.home();
+                        }
+                        (KeyCode::Tab, KeyModifiers::NONE) => {
+                            self.toggle_selected();
+                            self.next();
+                        }
 
-                    // ignore other key codes
-                    _ => {}
-                }
-            };
+                        // ignore other key codes
+                        _ => {}
+                    }
+                };
+            }
         }
     }
 }
