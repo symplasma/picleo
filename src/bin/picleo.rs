@@ -59,7 +59,7 @@ fn main() -> Result<()> {
         // List files from directories
         for dir in args.dirs {
             if args.threaded {
-                picker.inject_items_threaded(|i| {
+                picker.inject_items_threaded(move |i| {
                     if args.recursive {
                         // Recursively walk the directory
                         walk_dir_recursive(&dir, i);
