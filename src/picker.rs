@@ -89,6 +89,10 @@ where
         self.join_handles.len()
     }
 
+    pub fn item_count(&self) -> u32 {
+        self.matcher.snapshot().item_count()
+    }
+
     pub fn tick(&mut self, timeout: u64) {
         self.matcher.tick(timeout);
         // TODO ensure that this is the correct place to call the thread join

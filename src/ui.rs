@@ -25,7 +25,7 @@ where
         )
         .split(f.area());
 
-    render_help(f, chunks[0], &app.running_threads());
+    render_help(f, chunks[0], &app.running_threads(), &app.item_count());
     render_search_input(f, app, chunks[1]);
     render_items(f, app, chunks[2]);
 
@@ -33,7 +33,7 @@ where
     app.update_height(chunks[2].height - 3);
 }
 
-fn render_help(f: &mut Frame, area: Rect, running_indexers: &usize) {
+fn render_help(f: &mut Frame, area: Rect, running_indexers: &usize, item_count: &u32) {
     let text = vec![Line::from(vec![
         Span::raw("Press "),
         Span::styled("↑/↓", Style::default().add_modifier(Modifier::BOLD)),
@@ -44,6 +44,12 @@ fn render_help(f: &mut Frame, area: Rect, running_indexers: &usize) {
         Span::raw(" to confirm, "),
         Span::styled("Esc", Style::default().add_modifier(Modifier::BOLD)),
         Span::raw(" to quit,"),
+        Span::raw(" matching against "),
+        Span::styled(
+            item_count.to_string(),
+            Style::default().add_modifier(Modifier::BOLD),
+        ),
+        Span::raw(" items,"),
         Span::raw(" ("),
         Span::styled(
             running_indexers.to_string(),
