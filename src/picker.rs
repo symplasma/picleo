@@ -91,6 +91,8 @@ where
 
     pub fn tick(&mut self, timeout: u64) {
         self.matcher.tick(timeout);
+        // TODO ensure that this is the correct place to call the thread join
+        let _running_indexers = self.join_finished_threads();
     }
 
     pub fn snapshot(&self) -> &Snapshot<SelectableItem<T>> {
