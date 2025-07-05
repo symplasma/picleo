@@ -52,43 +52,18 @@ fn main() -> Result<()> {
         // Create app state
         let mut picker = Picker::<DisplayPath>::new();
 
-        picker.inject_items(|i| {
-            // List files from directories
-            for dir in args.dirs {
+        // List files from directories
+        for dir in args.dirs {
+            picker.inject_items(|i| {
                 if args.recursive {
                     // Recursively walk the directory
-                    fn walk_dir(
-                        dir: &PathBuf,
-                        injector: &nucleo::Injector<SelectableItem<DisplayPath>>,
-                    ) {
-                        if let Ok(entries) = fs::read_dir(dir) {
-                            for entry in entries.flatten() {
-                                let path = entry.path();
-                                if path.is_dir() {
-                                    walk_dir(&path, injector);
-                                } else {
-                                    injector.push(
-                                        SelectableItem::new(DisplayPath(path)),
-                                        |item, columns| columns[0] = item.to_string().into(),
-                                    );
-                                }
-                            }
-                        }
-                    }
-                    walk_dir(&dir, i);
+                    walk_dir_recursive(&dir, i);
                 } else {
                     // Non-recursive: only list direct children
-                    if let Ok(entries) = fs::read_dir(&dir) {
-                        for entry in entries.flatten() {
-                            let path = entry.path();
-                            i.push(SelectableItem::new(DisplayPath(path)), |item, columns| {
-                                columns[0] = item.to_string().into()
-                            });
-                        }
-                    }
+                    walk_dir(dir, i);
                 }
-            }
-        });
+            });
+        }
 
         // Run app
         match picker.run() {
@@ -131,4 +106,30 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn walk_dir(dir: PathBuf, i: &nucleo::Injector<SelectableItem<DisplayPath>>) {
+    if let Ok(entries) = fs::read_dir(&dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            i.push(SelectableItem::new(DisplayPath(path)), |item, columns| {
+                columns[0] = item.to_string().into()
+            });
+        }
+    }
+}
+
+fn walk_dir_recursive(dir: &PathBuf, injector: &nucleo::Injector<SelectableItem<DisplayPath>>) {
+    if let Ok(entries) = fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                walk_dir_recursive(&path, injector);
+            } else {
+                injector.push(SelectableItem::new(DisplayPath(path)), |item, columns| {
+                    columns[0] = item.to_string().into()
+                });
+            }
+        }
+    }
 }
