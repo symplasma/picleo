@@ -93,10 +93,10 @@ where
         self.matcher.snapshot().item_count()
     }
 
-    pub fn tick(&mut self, timeout: u64) {
-        self.matcher.tick(timeout);
+    pub fn tick(&mut self, timeout: u64) -> nucleo::Status {
         // TODO ensure that this is the correct place to call the thread join
         let _running_indexers = self.join_finished_threads();
+        self.matcher.tick(timeout)
     }
 
     pub fn snapshot(&self) -> &Snapshot<SelectableItem<T>> {
@@ -464,14 +464,20 @@ where
         &mut self,
         terminal: &mut Terminal<B>,
     ) -> AppResult<Vec<&T>> {
+        // draw the UI once initially before any timeouts so it appears to the user immediately
+        terminal.draw(|f| ui(f, self))?;
+
+        let mut event_received = false;
+
+        // enter the actual event loop
         loop {
-            self.tick(10);
-            terminal.draw(|f| ui(f, self))?;
+            let status = self.tick(10);
 
             // ensure that we update the UI, even when we aren't receiving events from the user
             if event::poll(Duration::from_millis(16))? {
                 // read the event that is ready (normally read blocks, but we're polling until it's ready)
                 if let Ok(Event::Key(key)) = event::read() {
+                    event_received = true;
                     match (key.code, key.modifiers) {
                         (KeyCode::Char(key), KeyModifiers::NONE)
                         | (KeyCode::Char(key), KeyModifiers::SHIFT) => {
@@ -556,9 +562,17 @@ where
                         }
 
                         // ignore other key codes
-                        _ => {}
+                        _ => {
+                            event_received = false;
+                        }
                     }
                 };
+            }
+
+            // if necessary, redraw the screen
+            if event_received || status.changed || status.running {
+                // TODO need to debounce events here
+                terminal.draw(|f| ui(f, self))?;
             }
         }
     }
