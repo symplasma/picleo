@@ -68,6 +68,23 @@ where
         self.join_handles.push(handle);
     }
 
+    pub fn join_finished_threads(&mut self) -> usize {
+        let mut remaining_handles = Vec::new();
+
+        for handle in self.join_handles.drain(..) {
+            if handle.is_finished() {
+                // Thread is finished, join it (ignore any errors)
+                let _ = handle.join();
+            } else {
+                // Thread is still running, keep it
+                remaining_handles.push(handle);
+            }
+        }
+
+        self.join_handles = remaining_handles;
+        self.join_handles.len()
+    }
+
     pub fn tick(&mut self, timeout: u64) {
         self.matcher.tick(timeout);
     }
