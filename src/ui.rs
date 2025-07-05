@@ -64,6 +64,12 @@ where
             Style::default().add_modifier(Modifier::BOLD),
         ),
         Span::raw(" threads still indexing)"),
+        Span::raw(format!(
+            " ({} {} {})",
+            app.first_visible_item_index(),
+            app.current_index,
+            app.last_visible_item_index()
+        )),
     ])];
 
     let paragraph = Paragraph::new(text);
