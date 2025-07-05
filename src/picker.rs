@@ -112,7 +112,9 @@ where
     }
 
     pub(crate) fn last_visible_item_index(&self) -> u32 {
-        self.first_visible_item_index + self.height as u32
+        (self.first_visible_item_index + self.height as u32)
+            // limiting this so we don't get an out of bounds error before loading items or when there are no matches
+            .min(self.snapshot().matched_item_count())
     }
 
     pub(crate) fn visible_item_range(&mut self) -> Range<u32> {

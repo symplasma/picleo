@@ -25,12 +25,14 @@ where
         )
         .split(f.area());
 
+    // update the height before rendering so this doesn't get out of sync
+    // TODO ensure that 3 is always correct or pull the correct value that takes terminal resizing into account
+    app.update_height(chunks[2].height - 1);
+
+    // render the sections of the display now that everything is setup and updated
     render_help(f, chunks[0], app);
     render_search_input(f, app, chunks[1]);
     render_items(f, app, chunks[2]);
-
-    // TODO ensure that 3 is always correct or pull the correct value that takes terminal resizing into account
-    app.update_height(chunks[2].height - 3);
 }
 
 fn render_help<T>(f: &mut Frame, area: Rect, app: &Picker<T>)
