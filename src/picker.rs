@@ -85,6 +85,10 @@ where
         self.join_handles.len()
     }
 
+    pub fn running_threads(&self) -> usize {
+        self.join_handles.len()
+    }
+
     pub fn tick(&mut self, timeout: u64) {
         self.matcher.tick(timeout);
     }
