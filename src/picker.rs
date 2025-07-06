@@ -9,7 +9,15 @@ use nucleo::{
     Config, Injector, Nucleo, Snapshot,
 };
 use ratatui::{prelude::CrosstermBackend, Terminal};
-use std::{error, fmt::Display, io, ops::Range, sync::Arc, thread::JoinHandle, time::Duration};
+use std::{
+    error,
+    fmt::Display,
+    io,
+    ops::{Range, RangeInclusive},
+    sync::Arc,
+    thread::JoinHandle,
+    time::Duration,
+};
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
@@ -116,21 +124,29 @@ where
 
     pub(crate) fn last_visible_item_index(&self) -> u32 {
         // TODO probable need to remove the -1 here
-        (self.first_visible_item_index + self.height as u32 - 1)
+        (self.first_visible_item_index + (self.height() as u32))
             // limiting this so we don't get an out of bounds error before loading items or when there are no matches
             .min(self.last_item_index())
     }
 
     // this should return a valid range that does not exceed the maximum number of items
-    pub(crate) fn visible_item_range(&mut self) -> Range<u32> {
-        self.first_visible_item_index()..self.last_visible_item_index()
+    pub(crate) fn visible_item_range(&mut self) -> RangeInclusive<u32> {
+        // we must use an inclusive range here or we'll be missing items that will cause some weird issues
+        self.first_visible_item_index()..=self.last_visible_item_index()
     }
 
     pub fn matched_items(&mut self) -> Vec<&SelectableItem<T>> {
-        let visible_item_range = self.visible_item_range();
+        // return if the matcher is empty or passing an inclusive range to matched_items will panic
+        if self.snapshot().item_count() == 0 {
+            return vec![];
+        }
+
+        // can't inline this or we'll have ownership issues
+        let item_range = self.visible_item_range();
+
         self.snapshot()
             // is important to restrict this to the visible range or things get really slow with lots of items
-            .matched_items(visible_item_range)
+            .matched_items(item_range)
             .map(|i| i.data)
             .collect()
     }
@@ -201,8 +217,6 @@ where
             self.first_visible_item_index = if new_index < 0 {
                 if wrap_around {
                     self.last_item_index().saturating_sub(self.height().into())
-                    // TODO determine if we need this min operation here
-                    // .min(self.height().into())
                 } else {
                     0
                 }
@@ -217,11 +231,9 @@ where
                     0
                 } else {
                     self.last_item_index().saturating_sub(self.height().into())
-                    // TODO determine if we need this min operation here
-                    // .min(self.height().into())
                 }
             } else {
-                new_index as u32 - (self.height() as u32) + 1
+                new_index as u32 - (self.height() as u32)
             }
         }
         // otherwise we don't need to shift the window
@@ -245,7 +257,7 @@ where
         let next_page_index = if self.current_index < self.last_visible_item_index() {
             self.last_visible_item_index()
         } else {
-            self.current_index + self.height() as u32 + 1
+            self.current_index + self.height() as u32
         };
         self.set_current_index(next_page_index.into(), false);
     }

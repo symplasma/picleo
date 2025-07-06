@@ -27,7 +27,7 @@ where
 
     // update the height before rendering so this doesn't get out of sync
     // TODO ensure that 3 is always correct or pull the correct value that takes terminal resizing into account
-    app.update_height(chunks[2].height - 1);
+    app.update_height(chunks[2].height - 3);
 
     // render the sections of the display now that everything is setup and updated
     render_help(f, chunks[0], app);
@@ -143,6 +143,7 @@ where
         area,
         &mut ratatui::widgets::ListState::default().with_selected(Some(
             app.current_index
+                // we need to correct the index here so that it's adjusted for the slice we're currently rendering
                 .saturating_sub(app.first_visible_item_index()) as usize,
         )),
     );
