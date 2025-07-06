@@ -176,15 +176,15 @@ where
         // ensure that the index is in range
         self.current_index = if new_index < 0 {
             if wrap_around {
-                self.item_count().saturating_sub(1)
+                self.last_item_index()
             } else {
                 0
             }
-        } else if new_index > self.item_count().into() {
+        } else if new_index > self.last_item_index().into() {
             if wrap_around {
                 0
             } else {
-                self.item_count()
+                self.last_item_index()
             }
         } else {
             new_index.try_into().unwrap()
