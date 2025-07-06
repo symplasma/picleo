@@ -67,10 +67,11 @@ where
         ),
         Span::raw(" threads still indexing)"),
         Span::raw(format!(
-            " ({} {} {})",
+            " ({} {} {} by {})",
             app.first_visible_item_index(),
             app.current_index,
-            app.last_visible_item_index()
+            app.last_visible_item_index(),
+            app.height()
         )),
     ])];
 
@@ -140,6 +141,9 @@ where
     f.render_stateful_widget(
         items,
         area,
-        &mut ratatui::widgets::ListState::default().with_selected(Some(app.current_index as usize)),
+        &mut ratatui::widgets::ListState::default().with_selected(Some(
+            app.current_index
+                .saturating_sub(app.first_visible_item_index()) as usize,
+        )),
     );
 }

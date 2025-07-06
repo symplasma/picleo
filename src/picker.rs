@@ -9,9 +9,7 @@ use nucleo::{
     Config, Injector, Nucleo, Snapshot,
 };
 use ratatui::{prelude::CrosstermBackend, Terminal};
-use std::{
-    error, fmt::Display, io, iter::once, ops::Range, sync::Arc, thread::JoinHandle, time::Duration,
-};
+use std::{error, fmt::Display, io, ops::Range, sync::Arc, thread::JoinHandle, time::Duration};
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
@@ -97,6 +95,11 @@ where
         self.matcher.snapshot().item_count()
     }
 
+    pub fn height(&self) -> u16 {
+        // truncation should be fine since we are getting the min and we don't want this to panic
+        self.height.min(self.item_count() as u16)
+    }
+
     pub fn tick(&mut self, timeout: u64) -> nucleo::Status {
         // TODO ensure that this is the correct place to call the thread join
         let _running_indexers = self.join_finished_threads();
@@ -112,25 +115,14 @@ where
     }
 
     pub(crate) fn last_visible_item_index(&self) -> u32 {
-        (self.first_visible_item_index + self.height as u32)
+        // TODO probable need to remove the -1 here
+        (self.first_visible_item_index + self.height as u32 - 1)
             // limiting this so we don't get an out of bounds error before loading items or when there are no matches
-            .min(self.snapshot().matched_item_count())
+            .min(self.last_item_index())
     }
 
+    // this should return a valid range that does not exceed the maximum number of items
     pub(crate) fn visible_item_range(&mut self) -> Range<u32> {
-        let current_index = self.current_index;
-
-        match (self.first_visible_item_index()..self.last_visible_item_index())
-            .cmp(once(current_index))
-        {
-            std::cmp::Ordering::Less => {
-                self.first_visible_item_index = self.first_visible_item_index()
-                    + (current_index.saturating_sub(self.last_visible_item_index()))
-            }
-            std::cmp::Ordering::Equal => {}
-            std::cmp::Ordering::Greater => self.first_visible_item_index = self.current_index,
-        };
-
         self.first_visible_item_index()..self.last_visible_item_index()
     }
 
@@ -167,67 +159,136 @@ where
         }
     }
 
+    /// Returns the total number of matched items
+    pub fn matched_item_count(&self) -> u32 {
+        self.snapshot().matched_item_count()
+    }
+
+    /// Returns the index of the last matched item
+    // TODO maybe return an Option<u32> here if there are not items. It might improve flow control
+    pub fn last_item_index(&self) -> u32 {
+        self.snapshot().matched_item_count().saturating_sub(1)
+    }
+
+    // this function should constrain the range to valid values and slide the window if necessary
+    // NOTE: we're taking an i64 here so we can handle negative values without truncating on the upper end of inputs
+    pub fn set_current_index(&mut self, new_index: i64, wrap_around: bool) -> u32 {
+        // ensure that the index is in range
+        self.current_index = if new_index < 0 {
+            if wrap_around {
+                self.item_count().saturating_sub(1)
+            } else {
+                0
+            }
+        } else if new_index > self.item_count().into() {
+            if wrap_around {
+                0
+            } else {
+                self.item_count()
+            }
+        } else {
+            new_index.try_into().unwrap()
+        };
+        self.set_item_window(self.current_index.into(), wrap_around);
+        self.current_index
+    }
+
+    // TODO maybe make new_index into a u32
+    pub fn set_item_window(&mut self, new_index: i64, wrap_around: bool) {
+        // ensure that the window contains the index
+        // TODO handle wrapping
+        if new_index < self.first_visible_item_index.into() {
+            self.first_visible_item_index = if new_index < 0 {
+                if wrap_around {
+                    self.last_item_index().saturating_sub(self.height().into())
+                    // TODO determine if we need this min operation here
+                    // .min(self.height().into())
+                } else {
+                    0
+                }
+            } else {
+                new_index.try_into().unwrap()
+                // self.first_visible_item_index().saturating_sub(1)
+            }
+            // these are unsigned ints so they shouldn't be able to go below zero
+        } else if new_index > self.last_visible_item_index().into() {
+            self.first_visible_item_index = if new_index > self.last_item_index().into() {
+                if wrap_around {
+                    0
+                } else {
+                    self.last_item_index().saturating_sub(self.height().into())
+                    // TODO determine if we need this min operation here
+                    // .min(self.height().into())
+                }
+            } else {
+                new_index as u32 - (self.height() as u32) + 1
+            }
+        }
+        // otherwise we don't need to shift the window
+    }
+
     pub fn next(&mut self) {
-        let indices = self.snapshot().matched_item_count();
+        let indices = self.last_item_index();
         if indices == 0 {
             return;
         }
 
-        self.current_index = (self.current_index + 1) % indices;
+        self.set_current_index((self.current_index + 1).into(), true);
     }
 
     fn next_page(&mut self) {
-        let indices = self.snapshot().matched_item_count();
+        let indices = self.last_visible_item_index();
         if indices == 0 {
             return;
         }
 
-        let next_page_index = self.current_index + self.height as u32;
-        self.current_index = if next_page_index > indices {
-            indices
+        let next_page_index = if self.current_index < self.last_visible_item_index() {
+            self.last_visible_item_index()
         } else {
-            next_page_index
-        }
+            self.current_index + self.height() as u32 + 1
+        };
+        self.set_current_index(next_page_index.into(), false);
     }
 
     fn end(&mut self) {
-        let indices = self.snapshot().matched_item_count();
+        let indices = self.last_item_index();
         if indices == 0 {
             return;
         }
 
-        self.current_index = indices;
+        self.set_current_index(indices.into(), false);
     }
 
     pub fn previous(&mut self) {
-        let indices = self.snapshot().matched_item_count();
+        let indices = self.last_item_index();
         if indices == 0 {
             return;
         }
 
-        self.current_index = if self.current_index == 0 {
-            indices - 1
-        } else {
-            self.current_index.saturating_sub(1)
-        };
+        self.set_current_index(self.current_index as i64 - 1, true);
     }
 
     pub fn previous_page(&mut self) {
-        let indices = self.snapshot().matched_item_count();
+        let indices = self.last_item_index();
         if indices == 0 {
             return;
         }
 
-        self.current_index = self.current_index.saturating_sub(self.height as u32);
+        let previous_page_index = if self.current_index > self.first_visible_item_index() {
+            self.first_visible_item_index().into()
+        } else {
+            self.current_index as i64 - self.height() as i64
+        };
+        self.set_current_index(previous_page_index, false);
     }
 
     fn home(&mut self) {
-        let indices = self.snapshot().matched_item_count();
+        let indices = self.last_item_index();
         if indices == 0 {
             return;
         }
 
-        self.current_index = 0;
+        self.set_current_index(0, false);
     }
 
     pub fn toggle_selected(&mut self) {
