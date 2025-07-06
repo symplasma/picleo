@@ -689,6 +689,9 @@ where
                             MouseEventKind::ScrollDown => {
                                 self.next();
                             }
+                            MouseEventKind::Down(MouseButton::Middle) => {
+                                self.toggle_selected();
+                            }
                             _ => {
                                 event_received = false;
                             }
