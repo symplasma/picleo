@@ -21,6 +21,9 @@ pub struct Config {
 
     /// Wrap around when navigating past first/last item
     pub wrap_around: Option<bool>,
+
+    /// Invert mouse scroll direction
+    pub invert_scroll: Option<bool>,
 }
 
 impl Default for Config {
@@ -31,6 +34,7 @@ impl Default for Config {
             case_matching: Some("smart".to_string()),
             normalization: Some("smart".to_string()),
             wrap_around: Some(true),
+            invert_scroll: Some(false),
         }
     }
 }
@@ -91,5 +95,10 @@ impl Config {
     /// Get the wrap around setting, falling back to default if not configured
     pub fn wrap_around(&self) -> bool {
         self.wrap_around.unwrap_or(true)
+    }
+
+    /// Get the invert scroll setting, falling back to default if not configured
+    pub fn invert_scroll(&self) -> bool {
+        self.invert_scroll.unwrap_or(false)
     }
 }

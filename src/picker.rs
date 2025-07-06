@@ -1,4 +1,4 @@
-use crate::{selectable::SelectableItem, ui::ui};
+use crate::{config::Config, selectable::SelectableItem, ui::ui};
 use crossterm::{
     event::{
         self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers, MouseButton,
@@ -36,6 +36,7 @@ where
     pub query: String,
     pub query_index: usize,
     pub join_handles: Vec<JoinHandle<()>>,
+    pub config: Config,
 }
 
 impl<T: Sync + Send + Display> Default for Picker<T> {
@@ -50,15 +51,17 @@ where
     T: Sync + Send + Display,
 {
     pub fn new() -> Self {
-        let matcher = Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
+        let config = Config::load().unwrap_or_default();
+        let matcher = Nucleo::new(nucleo::Config::DEFAULT, Arc::new(|| {}), None, 1);
         Picker {
             matcher,
             first_visible_item_index: 0,
             current_index: 0,
-            height: 0,
+            height: config.height().unwrap_or(0),
             query: String::new(),
             query_index: 0,
             join_handles: Vec::new(),
+            config,
         }
     }
 
@@ -191,7 +194,8 @@ where
 
     // this function should constrain the range to valid values and slide the window if necessary
     // NOTE: we're taking an i64 here so we can handle negative values without truncating on the upper end of inputs
-    pub fn set_current_index(&mut self, new_index: i64, wrap_around: bool) -> u32 {
+    pub fn set_current_index(&mut self, new_index: i64, wrap_around: Option<bool>) -> u32 {
+        let wrap_around = wrap_around.unwrap_or_else(|| self.config.wrap_around());
         // ensure that the index is in range
         self.current_index = if new_index < 0 {
             if wrap_around {
@@ -213,7 +217,8 @@ where
     }
 
     // TODO maybe make new_index into a u32
-    pub fn set_item_window(&mut self, new_index: i64, wrap_around: bool) {
+    pub fn set_item_window(&mut self, new_index: i64, wrap_around: Option<bool>) {
+        let wrap_around = wrap_around.unwrap_or_else(|| self.config.wrap_around());
         // ensure that the window contains the index
         // TODO handle wrapping
         if new_index < self.first_visible_item_index.into() {
@@ -248,7 +253,7 @@ where
             return;
         }
 
-        self.set_current_index((self.current_index + 1).into(), true);
+        self.set_current_index((self.current_index + 1).into(), None);
     }
 
     fn next_page(&mut self) {
@@ -262,7 +267,7 @@ where
         } else {
             self.current_index + self.height() as u32
         };
-        self.set_current_index(next_page_index.into(), false);
+        self.set_current_index(next_page_index.into(), Some(false));
     }
 
     fn end(&mut self) {
@@ -271,7 +276,7 @@ where
             return;
         }
 
-        self.set_current_index(indices.into(), false);
+        self.set_current_index(indices.into(), Some(false));
     }
 
     pub fn previous(&mut self) {
@@ -280,7 +285,7 @@ where
             return;
         }
 
-        self.set_current_index(self.current_index as i64 - 1, true);
+        self.set_current_index(self.current_index as i64 - 1, None);
     }
 
     pub fn previous_page(&mut self) {
@@ -294,7 +299,7 @@ where
         } else {
             self.current_index as i64 - self.height() as i64
         };
-        self.set_current_index(previous_page_index, false);
+        self.set_current_index(previous_page_index, Some(false));
     }
 
     fn home(&mut self) {
@@ -303,7 +308,7 @@ where
             return;
         }
 
-        self.set_current_index(0, false);
+        self.set_current_index(0, Some(false));
     }
 
     pub fn toggle_selected(&mut self) {
@@ -335,7 +340,7 @@ where
         );
         // ensure that the selection stays in range
         // TODO find a better way, ideally one that preserves the position as much as possible
-        self.set_current_index(0, false);
+        self.set_current_index(0, Some(false));
     }
 
     pub(crate) fn jump_word_forward(&mut self) {
@@ -687,10 +692,18 @@ where
                         event_received = true;
                         match mouse.kind {
                             MouseEventKind::ScrollUp => {
-                                self.previous();
+                                if self.config.invert_scroll() {
+                                    self.next();
+                                } else {
+                                    self.previous();
+                                }
                             }
                             MouseEventKind::ScrollDown => {
-                                self.next();
+                                if self.config.invert_scroll() {
+                                    self.previous();
+                                } else {
+                                    self.next();
+                                }
                             }
                             MouseEventKind::Down(MouseButton::Middle) => {
                                 self.toggle_selected();
