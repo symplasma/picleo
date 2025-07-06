@@ -1,6 +1,6 @@
 use crate::{selectable::SelectableItem, ui::ui};
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers},
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers, MouseButton, MouseEventKind},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -588,9 +588,10 @@ where
             // ensure that we update the UI, even when we aren't receiving events from the user
             if event::poll(Duration::from_millis(16))? {
                 // read the event that is ready (normally read blocks, but we're polling until it's ready)
-                if let Ok(Event::Key(key)) = event::read() {
-                    event_received = true;
-                    match (key.code, key.modifiers) {
+                match event::read()? {
+                    Event::Key(key) => {
+                        event_received = true;
+                        match (key.code, key.modifiers) {
                         (KeyCode::Char(key), KeyModifiers::NONE)
                         | (KeyCode::Char(key), KeyModifiers::SHIFT) => {
                             self.append_to_query(key);
@@ -673,12 +674,30 @@ where
                             self.next();
                         }
 
-                        // ignore other key codes
-                        _ => {
-                            event_received = false;
+                            // ignore other key codes
+                            _ => {
+                                event_received = false;
+                            }
                         }
                     }
-                };
+                    Event::Mouse(mouse) => {
+                        event_received = true;
+                        match mouse.kind {
+                            MouseEventKind::ScrollUp => {
+                                self.previous();
+                            }
+                            MouseEventKind::ScrollDown => {
+                                self.next();
+                            }
+                            _ => {
+                                event_received = false;
+                            }
+                        }
+                    }
+                    _ => {
+                        event_received = false;
+                    }
+                }
             }
 
             // if necessary, redraw the screen
