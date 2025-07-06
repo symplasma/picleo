@@ -9,17 +9,11 @@ use crossterm::{
 };
 use nucleo::{
     pattern::{CaseMatching, Normalization},
-    Config, Injector, Nucleo, Snapshot,
+    Config as NucleoConfig, Injector, Nucleo, Snapshot,
 };
 use ratatui::{prelude::CrosstermBackend, Terminal};
 use std::{
-    error,
-    fmt::Display,
-    io,
-    ops::{Range, RangeInclusive},
-    sync::Arc,
-    thread::JoinHandle,
-    time::Duration,
+    error, fmt::Display, io, ops::RangeInclusive, sync::Arc, thread::JoinHandle, time::Duration,
 };
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -52,7 +46,7 @@ where
 {
     pub fn new() -> Self {
         let config = Config::load().unwrap_or_default();
-        let matcher = Nucleo::new(nucleo::Config::DEFAULT, Arc::new(|| {}), None, 1);
+        let matcher = Nucleo::new(NucleoConfig::DEFAULT, Arc::new(|| {}), None, 1);
         Picker {
             matcher,
             first_visible_item_index: 0,
@@ -217,8 +211,7 @@ where
     }
 
     // TODO maybe make new_index into a u32
-    pub fn set_item_window(&mut self, new_index: i64, wrap_around: Option<bool>) {
-        let wrap_around = wrap_around.unwrap_or_else(|| self.config.wrap_around());
+    pub fn set_item_window(&mut self, new_index: i64, wrap_around: bool) {
         // ensure that the window contains the index
         // TODO handle wrapping
         if new_index < self.first_visible_item_index.into() {
