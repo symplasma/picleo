@@ -5,7 +5,86 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.4 (2025-07-06)
+
+### Chore
+
+ - <csr-id-30d47743a2f274727b93e36749c9871a8d32d974/> Add index debugging indicators
+ - <csr-id-84a390c9a497199e5d0ebd85de83a975d199a3a8/> Call join_finished_threads in tick
+ - <csr-id-472bbe20a890566b4440cd31e3807d5e1546b7ac/> Add necessary move keyword
+
+### New Features
+
+ - <csr-id-a8e53a50a718c654de32f5c43655d6617fcc49d5/> Add "no items found" screen
+   This also prevents a crash that seems to be due to the RangeInclusive and how it interacts with Nucleo when there are no matches.
+ - <csr-id-ea5b80881346f5229d653494dbfa0cdf62760380/> Add sliding item window
+   This is a first try. Still not working totally reliably just yet.
+ - <csr-id-345b843f25f804c6b4f39560d0d7bfd05bf671f4/> Improve redraw logic
+ - <csr-id-c756ecee3dad3321e760305daac3df4e30ee4d26/> Add polling to improve responsiveness
+   We now redraw the screen even when there is no user input. This can probably be made more efficient though.
+ - <csr-id-799d1aaa936ca62790fb8504bdd140839d3ebcc5/> Add matched items
+ - <csr-id-0df432b122a024e6d613a1ff95c6d8301de64f6e/> Add item count
+ - <csr-id-bb0ea943c36c8b142db2d3e308316069f04166e5/> Add running thread count
+ - <csr-id-8981ad967a8c4dfddf7eec92d6da35888c3516af/> Add running_threads method
+ - <csr-id-f580bd4727608f373472b581a162757f1c5133a1/> add join_finished_threads method to Picker to manage thread handles
+ - <csr-id-50ebd68a4f43623c217b68033a7f7e9062ab8521/> add threaded flag to enable threaded item injection
+ - <csr-id-fee75db61788861db8731b9356c70a8bad4447aa/> add recursive flag to index files in directories recursively
+ - <csr-id-079aa42b5ef1fa68a357a67dd7db9516c4a5fb51/> add threaded item injection with join handles in Picker
+
+### Bug Fixes
+
+ - <csr-id-b6b314a1d8c96c1a7ded1dfad521201281070a64/> Finally got navigation working
+
+### Refactor
+
+ - <csr-id-5a70a3672df309ccab090790b72d839011c5ded1/> Convert a few calls to last_item_index
+ - <csr-id-a0138182ce82cc323a7fa5d94eb9cb0aceca8234/> Clean up range and window logic
+ - <csr-id-54bdce889d04cefa624081b882c64451f5a2f840/> Update app height before render
+ - <csr-id-a5c49136fd0ea877ebbce60c3392cb0cc51eef19/> Factor out dir walking
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 20 commits contributed to the release over the course of 1 calendar day.
+ - 32 days passed between releases.
+ - 20 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Add "no items found" screen ([`a8e53a5`](https://github.com/symplasma/picleo/commit/a8e53a50a718c654de32f5c43655d6617fcc49d5))
+    - Finally got navigation working ([`b6b314a`](https://github.com/symplasma/picleo/commit/b6b314a1d8c96c1a7ded1dfad521201281070a64))
+    - Convert a few calls to last_item_index ([`5a70a36`](https://github.com/symplasma/picleo/commit/5a70a3672df309ccab090790b72d839011c5ded1))
+    - Clean up range and window logic ([`a013818`](https://github.com/symplasma/picleo/commit/a0138182ce82cc323a7fa5d94eb9cb0aceca8234))
+    - Update app height before render ([`54bdce8`](https://github.com/symplasma/picleo/commit/54bdce889d04cefa624081b882c64451f5a2f840))
+    - Add index debugging indicators ([`30d4774`](https://github.com/symplasma/picleo/commit/30d47743a2f274727b93e36749c9871a8d32d974))
+    - Add sliding item window ([`ea5b808`](https://github.com/symplasma/picleo/commit/ea5b80881346f5229d653494dbfa0cdf62760380))
+    - Improve redraw logic ([`345b843`](https://github.com/symplasma/picleo/commit/345b843f25f804c6b4f39560d0d7bfd05bf671f4))
+    - Add polling to improve responsiveness ([`c756ece`](https://github.com/symplasma/picleo/commit/c756ecee3dad3321e760305daac3df4e30ee4d26))
+    - Add matched items ([`799d1aa`](https://github.com/symplasma/picleo/commit/799d1aaa936ca62790fb8504bdd140839d3ebcc5))
+    - Add item count ([`0df432b`](https://github.com/symplasma/picleo/commit/0df432b122a024e6d613a1ff95c6d8301de64f6e))
+    - Add running thread count ([`bb0ea94`](https://github.com/symplasma/picleo/commit/bb0ea943c36c8b142db2d3e308316069f04166e5))
+    - Call join_finished_threads in tick ([`84a390c`](https://github.com/symplasma/picleo/commit/84a390c9a497199e5d0ebd85de83a975d199a3a8))
+    - Add running_threads method ([`8981ad9`](https://github.com/symplasma/picleo/commit/8981ad967a8c4dfddf7eec92d6da35888c3516af))
+    - Add join_finished_threads method to Picker to manage thread handles ([`f580bd4`](https://github.com/symplasma/picleo/commit/f580bd4727608f373472b581a162757f1c5133a1))
+    - Add necessary move keyword ([`472bbe2`](https://github.com/symplasma/picleo/commit/472bbe20a890566b4440cd31e3807d5e1546b7ac))
+    - Add threaded flag to enable threaded item injection ([`50ebd68`](https://github.com/symplasma/picleo/commit/50ebd68a4f43623c217b68033a7f7e9062ab8521))
+    - Factor out dir walking ([`a5c4913`](https://github.com/symplasma/picleo/commit/a5c49136fd0ea877ebbce60c3392cb0cc51eef19))
+    - Add recursive flag to index files in directories recursively ([`fee75db`](https://github.com/symplasma/picleo/commit/fee75db61788861db8731b9356c70a8bad4447aa))
+    - Add threaded item injection with join handles in Picker ([`079aa42`](https://github.com/symplasma/picleo/commit/079aa42b5ef1fa68a357a67dd7db9516c4a5fb51))
+</details>
+
 ## v0.1.3 (2025-06-04)
+
+<csr-id-e28dd409e829470a618f797a3bc39735635cbb07/>
+<csr-id-c53acba0facdf7ea7f5d53e00120fd4f8c8d0859/>
+<csr-id-27e1d7aa90e9d99578bf984ffd02af4e6a8a947a/>
 
 ### Chore
 
@@ -36,7 +115,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 12 commits contributed to the release over the course of 6 calendar days.
+ - 13 commits contributed to the release over the course of 6 calendar days.
  - 7 days passed between releases.
  - 12 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
@@ -48,6 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release picleo v0.1.3 ([`2be65f2`](https://github.com/symplasma/picleo/commit/2be65f263db9beb9932844aab2edf5364715d918))
     - Add Ctrl+K to delete from cursor to end of query ([`8481524`](https://github.com/symplasma/picleo/commit/84815245415a2863bbab4194701c6c2d544d6be7))
     - Add jump to beginning and end ([`de6b6f8`](https://github.com/symplasma/picleo/commit/de6b6f8cf04dac78b020f6f0a41487ffd740727a))
     - Remove todo comment ([`e28dd40`](https://github.com/symplasma/picleo/commit/e28dd409e829470a618f797a3bc39735635cbb07))
