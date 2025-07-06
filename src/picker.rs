@@ -330,6 +330,9 @@ where
             Normalization::Smart,
             true,
         );
+        // ensure that the selection stays in range
+        // TODO find a better way, ideally one that preserves the position as much as possible
+        self.set_current_index(0, false);
     }
 
     pub(crate) fn jump_word_forward(&mut self) {

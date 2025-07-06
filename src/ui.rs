@@ -1,6 +1,6 @@
 use crate::picker::Picker;
 use ratatui::{
-    layout::{Constraint, Direction, Layout, Rect},
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, List, ListItem, Paragraph},
@@ -109,42 +109,60 @@ fn render_items<T>(f: &mut Frame, app: &mut Picker<T>, area: Rect)
 where
     T: Sync + Send + Display,
 {
-    let items: Vec<ListItem> = app
-        .matched_items()
-        .iter()
-        .map(|item| {
-            let is_selected = item.is_selected();
-            let style = if is_selected {
+    if app.matched_item_count() > 0 {
+        let items: Vec<ListItem> = app
+            .matched_items()
+            .iter()
+            .map(|item| {
+                let is_selected = item.is_selected();
+                let style = if is_selected {
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD)
+                } else {
+                    Style::default()
+                };
+
+                let prefix = if is_selected { "✓ " } else { "  " };
+                let content = format!("{}{}", prefix, item);
+
+                ListItem::new(content).style(style)
+            })
+            .collect();
+
+        let items = List::new(items)
+            .block(Block::default().borders(Borders::ALL).title("Items"))
+            .highlight_style(
                 Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD)
-            } else {
-                Style::default()
-            };
+                    .bg(Color::Blue)
+                    .add_modifier(Modifier::BOLD),
+            )
+            .highlight_symbol("> ");
 
-            let prefix = if is_selected { "✓ " } else { "  " };
-            let content = format!("{}{}", prefix, item);
+        f.render_stateful_widget(
+            items,
+            area,
+            &mut ratatui::widgets::ListState::default().with_selected(Some(
+                app.current_index
+                    // we need to correct the index here so that it's adjusted for the slice we're currently rendering
+                    .saturating_sub(app.first_visible_item_index()) as usize,
+            )),
+        );
+    } else {
+        let chunks = Layout::default()
+            .direction(Direction::Vertical)
+            // .margin(2)
+            .constraints(
+                [
+                    Constraint::Min(1),
+                    Constraint::Length(1),
+                    Constraint::Min(1),
+                ]
+                .as_ref(),
+            )
+            .split(f.area());
 
-            ListItem::new(content).style(style)
-        })
-        .collect();
-
-    let items = List::new(items)
-        .block(Block::default().borders(Borders::ALL).title("Items"))
-        .highlight_style(
-            Style::default()
-                .bg(Color::Blue)
-                .add_modifier(Modifier::BOLD),
-        )
-        .highlight_symbol("> ");
-
-    f.render_stateful_widget(
-        items,
-        area,
-        &mut ratatui::widgets::ListState::default().with_selected(Some(
-            app.current_index
-                // we need to correct the index here so that it's adjusted for the slice we're currently rendering
-                .saturating_sub(app.first_visible_item_index()) as usize,
-        )),
-    );
+        let no_items_paragraph = Paragraph::new("No items found").alignment(Alignment::Center);
+        f.render_widget(no_items_paragraph, chunks[1]);
+    }
 }
