@@ -5,7 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.6 (2025-07-07)
+
+### Chore
+
+ - <csr-id-b4f914493a3830d121464de08a53fd99b561dfa5/> Make new items selected by default
+ - <csr-id-7b9b90c3134c401e132c224c4f160b9c8754ae7d/> Run cargo fmt
+
+### Documentation
+
+ - <csr-id-a6b4765cde5340a53133b2b7f8d9ff336d682990/> Update README
+
+### New Features
+
+ - <csr-id-db68bbf9456837c6df42d96a518c8eb213192d6d/> Add item editing and creation
+ - <csr-id-567824681a9de1e538607e15ae20c7ff661576af/> add item editing mode with Ctrl+n, Enter, and Esc support
+ - <csr-id-ee35a5af83de37329e424bd8564791833cc51c09/> Switch the duplicate key to Ctrl-d
+ - <csr-id-ed2b381926b816a9398c6a7c9b659a98823b82ca/> Add `SelectedItems` struct with methods to extract selected item values
+ - <csr-id-234a88ef0b5d200d8e00af503b08da0d583c7e04/> add Ctrl+n functionality to create new requested item from selected
+ - <csr-id-667c2a32ff7b771c6ddf34613168ea95631bf016/> add page navigation with Shift/Control modifier on mouse scroll
+
+### Bug Fixes
+
+ - <csr-id-aa51dcb2ebb76de61f97141a203aba6b81e62f4d/> update iteration over SelectedItems to use existing_values() and requested_values()
+
+### Refactor
+
+ - <csr-id-a9147753f1fc154543bec97216477eafc114670b/> Refactor search mode event handling
+   This is partly to help the AI assistant. It's last go at adding an editing mode wasn't bad but it was very WET code.
+ - <csr-id-0f3366ac433473a8931802b02f6060d54cd3b9f4/> Convert SelectableItem struct to enum with Existing and Requested variants
+
+### Style
+
+ - <csr-id-eb2e9067ff49462afb06b07ee876e18035998f49/> format mouse scroll event handling with improved readability
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 13 commits contributed to the release.
+ - 13 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Update README ([`a6b4765`](https://github.com/symplasma/picleo/commit/a6b4765cde5340a53133b2b7f8d9ff336d682990))
+    - Add item editing and creation ([`db68bbf`](https://github.com/symplasma/picleo/commit/db68bbf9456837c6df42d96a518c8eb213192d6d))
+    - Make new items selected by default ([`b4f9144`](https://github.com/symplasma/picleo/commit/b4f914493a3830d121464de08a53fd99b561dfa5))
+    - Add item editing mode with Ctrl+n, Enter, and Esc support ([`5678246`](https://github.com/symplasma/picleo/commit/567824681a9de1e538607e15ae20c7ff661576af))
+    - Refactor search mode event handling ([`a914775`](https://github.com/symplasma/picleo/commit/a9147753f1fc154543bec97216477eafc114670b))
+    - Switch the duplicate key to Ctrl-d ([`ee35a5a`](https://github.com/symplasma/picleo/commit/ee35a5af83de37329e424bd8564791833cc51c09))
+    - Update iteration over SelectedItems to use existing_values() and requested_values() ([`aa51dcb`](https://github.com/symplasma/picleo/commit/aa51dcb2ebb76de61f97141a203aba6b81e62f4d))
+    - Add `SelectedItems` struct with methods to extract selected item values ([`ed2b381`](https://github.com/symplasma/picleo/commit/ed2b381926b816a9398c6a7c9b659a98823b82ca))
+    - Run cargo fmt ([`7b9b90c`](https://github.com/symplasma/picleo/commit/7b9b90c3134c401e132c224c4f160b9c8754ae7d))
+    - Add Ctrl+n functionality to create new requested item from selected ([`234a88e`](https://github.com/symplasma/picleo/commit/234a88ef0b5d200d8e00af503b08da0d583c7e04))
+    - Convert SelectableItem struct to enum with Existing and Requested variants ([`0f3366a`](https://github.com/symplasma/picleo/commit/0f3366ac433473a8931802b02f6060d54cd3b9f4))
+    - Format mouse scroll event handling with improved readability ([`eb2e906`](https://github.com/symplasma/picleo/commit/eb2e9067ff49462afb06b07ee876e18035998f49))
+    - Add page navigation with Shift/Control modifier on mouse scroll ([`667c2a3`](https://github.com/symplasma/picleo/commit/667c2a32ff7b771c6ddf34613168ea95631bf016))
+</details>
+
 ## v0.1.5 (2025-07-07)
+
+<csr-id-90103a3ed35a83eaed9c21b5c9e09d69f5742061/>
 
 ### Chore
 
@@ -30,7 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 10 commits contributed to the release.
+ - 11 commits contributed to the release.
  - 10 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -41,6 +107,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release picleo v0.1.5 ([`c9e5448`](https://github.com/symplasma/picleo/commit/c9e54480929db941855b730a4aa2d75ad538579f))
     - Add mouse click support to toggle item selection ([`778f22f`](https://github.com/symplasma/picleo/commit/778f22fdca84ed1f01390db58df96c68df7c0364))
     - Escape clears query, then quits ([`8f516a0`](https://github.com/symplasma/picleo/commit/8f516a0f42d9f65fb979b67c2f2bb05b5347e7de))
     - Add features to list ([`be93127`](https://github.com/symplasma/picleo/commit/be931272f14dba9c7e1d23c69e7055d85ee67978))
