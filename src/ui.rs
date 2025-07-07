@@ -1,4 +1,4 @@
-use crate::picker::Picker;
+use crate::picker::{Picker, PickerMode};
 use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
@@ -74,14 +74,15 @@ fn render_search_input<T>(f: &mut Frame, app: &Picker<T>, area: Rect)
 where
     T: Sync + Send + Display,
 {
-    // Split the query at the cursor position
-    let before_cursor = app.query.chars().take(app.query_index).collect::<String>();
-    let cursor_char = app.query.chars().nth(app.query_index).unwrap_or(' ');
-    let after_cursor = app
-        .query
-        .chars()
-        .skip(app.query_index + 1)
-        .collect::<String>();
+    let (text, cursor_index, title) = match app.mode {
+        crate::picker::PickerMode::Search => (&app.query, app.query_index, "Search"),
+        crate::picker::PickerMode::Editing => (&app.editing_text, app.editing_index, "Editing"),
+    };
+
+    // Split the text at the cursor position
+    let before_cursor = text.chars().take(cursor_index).collect::<String>();
+    let cursor_char = text.chars().nth(cursor_index).unwrap_or(' ');
+    let after_cursor = text.chars().skip(cursor_index + 1).collect::<String>();
 
     // Create a line with styled spans for before, cursor, and after
     let line = Line::from(vec![
@@ -92,7 +93,7 @@ where
 
     let input = Paragraph::new(line)
         .style(Style::default())
-        .block(Block::default().borders(Borders::ALL).title("Search"));
+        .block(Block::default().borders(Borders::ALL).title(title));
 
     let snapshot = app.snapshot();
     let item_count_text = vec![Line::from(vec![Span::styled(

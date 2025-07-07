@@ -42,6 +42,12 @@ impl<'a, T> SelectedItems<'a, T> {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum PickerMode {
+    Search,
+    Editing,
+}
+
 enum EventResponse {
     NoAction,
     UpdateUI,
@@ -60,6 +66,9 @@ where
     pub height: u16,
     pub query: String,
     pub query_index: usize,
+    pub mode: PickerMode,
+    pub editing_text: String,
+    pub editing_index: usize,
     pub join_handles: Vec<JoinHandle<()>>,
     pub config: Config,
 }
@@ -85,6 +94,9 @@ where
             height: config.height().unwrap_or(0),
             query: String::new(),
             query_index: 0,
+            mode: PickerMode::Search,
+            editing_text: String::new(),
+            editing_index: 0,
             join_handles: Vec::new(),
             config,
         }
@@ -416,6 +428,14 @@ where
         self.set_current_index(0, Some(false));
     }
 
+    pub(crate) fn append_to_editing_text(&mut self, key: char) {
+        if self.editing_index >= self.editing_text.len() {
+            self.editing_text.push(key);
+        } else {
+            self.editing_text.insert(self.editing_index, key);
+        }
+    }
+
     pub(crate) fn jump_word_forward(&mut self) {
         let query_len = self.query.len();
         if self.query_index >= query_len {
@@ -618,6 +638,13 @@ where
         );
     }
 
+    pub(crate) fn delete_from_editing_text(&mut self) {
+        if self.editing_index > 0 && !self.editing_text.is_empty() {
+            // Remove the character before the cursor
+            self.editing_text.remove(self.editing_index - 1);
+        }
+    }
+
     pub fn query_is_empty(&self) -> bool {
         self.query.is_empty()
     }
@@ -632,6 +659,34 @@ where
             Normalization::Smart,
             false,
         );
+    }
+
+    pub(crate) fn clear_editing_text(&mut self) {
+        self.editing_text.clear();
+        self.editing_index = 0;
+    }
+
+    pub(crate) fn enter_editing_mode(&mut self) {
+        self.mode = PickerMode::Editing;
+        self.editing_text.clear();
+        self.editing_index = 0;
+    }
+
+    pub(crate) fn exit_editing_mode(&mut self) {
+        self.mode = PickerMode::Search;
+        self.editing_text.clear();
+        self.editing_index = 0;
+    }
+
+    pub(crate) fn create_item_from_editing_text(&mut self) {
+        if !self.editing_text.is_empty() {
+            let new_item = SelectableItem::new_requested(self.editing_text.clone());
+            let injector = self.matcher.injector();
+            injector.push(new_item, |item, columns| {
+                columns[0] = item.to_string().into()
+            });
+        }
+        self.exit_editing_mode();
     }
 
     pub fn run(&mut self) -> AppResult<SelectedItems<T>> {
@@ -700,6 +755,12 @@ where
         match event {
             Event::Key(key) => {
                 event_response = EventResponse::UpdateUI;
+
+                // Handle mode-specific events first
+                if self.mode == PickerMode::Editing {
+                    return self.handle_editing_mode_key_event(key);
+                }
+
                 match (key.code, key.modifiers) {
                     (KeyCode::Char(key), KeyModifiers::NONE)
                     | (KeyCode::Char(key), KeyModifiers::SHIFT) => {
@@ -788,6 +849,9 @@ where
                     (KeyCode::Char('d'), KeyModifiers::CONTROL) => {
                         self.create_new_item();
                     }
+                    (KeyCode::Char('n'), KeyModifiers::CONTROL) => {
+                        self.enter_editing_mode();
+                    }
 
                     // ignore other key codes
                     _ => {
@@ -851,5 +915,51 @@ where
             }
         }
         event_response
+    }
+
+    /// Handle key events when in editing mode
+    fn handle_editing_mode_key_event(&mut self, key: crossterm::event::KeyEvent) -> EventResponse {
+        match (key.code, key.modifiers) {
+            (KeyCode::Char(ch), KeyModifiers::NONE) | (KeyCode::Char(ch), KeyModifiers::SHIFT) => {
+                self.append_to_editing_text(ch);
+                self.editing_index = self.editing_index.saturating_add(1);
+                EventResponse::UpdateUI
+            }
+            (KeyCode::Backspace, KeyModifiers::NONE) => {
+                self.delete_from_editing_text();
+                self.editing_index = self.editing_index.saturating_sub(1);
+                EventResponse::UpdateUI
+            }
+            (KeyCode::Right, KeyModifiers::NONE) => {
+                self.editing_index = (self.editing_index + 1).min(self.editing_text.len());
+                EventResponse::UpdateUI
+            }
+            (KeyCode::Left, KeyModifiers::NONE) => {
+                self.editing_index = self.editing_index.saturating_sub(1);
+                EventResponse::UpdateUI
+            }
+            (KeyCode::Home, KeyModifiers::NONE) | (KeyCode::Char('a'), KeyModifiers::CONTROL) => {
+                self.editing_index = 0;
+                EventResponse::UpdateUI
+            }
+            (KeyCode::End, KeyModifiers::NONE) | (KeyCode::Char('e'), KeyModifiers::CONTROL) => {
+                self.editing_index = self.editing_text.len();
+                EventResponse::UpdateUI
+            }
+            (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
+                self.clear_editing_text();
+                EventResponse::UpdateUI
+            }
+            (KeyCode::Enter, KeyModifiers::NONE) => {
+                self.create_item_from_editing_text();
+                EventResponse::UpdateUI
+            }
+            (KeyCode::Esc, KeyModifiers::NONE) => {
+                self.exit_editing_mode();
+                EventResponse::UpdateUI
+            }
+            (KeyCode::Char('c'), KeyModifiers::CONTROL) => EventResponse::ExitProgram,
+            _ => EventResponse::NoAction,
+        }
     }
 }
