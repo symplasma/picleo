@@ -538,6 +538,10 @@ where
         );
     }
 
+    pub fn query_is_empty(&self) -> bool {
+        self.query.is_empty()
+    }
+
     pub(crate) fn clear_query(&mut self) {
         self.query.clear();
         // TODO seems like there should be a better way to clear the query
@@ -630,7 +634,11 @@ where
                                 self.delete_word_forward();
                             }
                             (KeyCode::Esc, KeyModifiers::NONE) => {
-                                return Ok(vec![]);
+                                if self.query_is_empty() {
+                                    return Ok(vec![]);
+                                } else {
+                                    self.clear_query();
+                                }
                             }
                             (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
                                 self.clear_query();
