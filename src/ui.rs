@@ -14,7 +14,6 @@ where
 {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
-        .margin(2)
         .constraints(
             [
                 Constraint::Length(1),
@@ -39,8 +38,7 @@ fn render_help<T>(f: &mut Frame, area: Rect, app: &Picker<T>)
 where
     T: Sync + Send + Display,
 {
-    let snapshot = app.snapshot();
-    let text = vec![Line::from(vec![
+    let left_text = vec![Line::from(vec![
         Span::raw("Press "),
         Span::styled("↑/↓", Style::default().add_modifier(Modifier::BOLD)),
         Span::raw(" to navigate, "),
@@ -49,39 +47,32 @@ where
         Span::styled("Enter", Style::default().add_modifier(Modifier::BOLD)),
         Span::raw(" to confirm, "),
         Span::styled("Esc", Style::default().add_modifier(Modifier::BOLD)),
-        Span::raw(" to quit,"),
-        Span::raw(" matching against "),
-        Span::styled(
-            format!(
-                "{}/{}",
-                snapshot.matched_item_count(),
-                snapshot.item_count()
-            ),
-            Style::default().add_modifier(Modifier::BOLD),
-        ),
-        Span::raw(" items,"),
-        Span::raw(" ("),
+        Span::raw(" to quit"),
+    ])];
+
+    let right_text = vec![Line::from(vec![
         Span::styled(
             app.running_threads().to_string(),
             Style::default().add_modifier(Modifier::BOLD),
         ),
-        Span::raw(" threads still indexing)"),
-        Span::raw(format!(
-            " ({} {} {} by {})",
-            app.first_visible_item_index(),
-            app.current_index,
-            app.last_visible_item_index(),
-            app.height()
-        )),
-    ])];
+        Span::raw(" indexers"),
+    ])
+    .right_aligned()];
 
-    let paragraph = Paragraph::new(text);
-    f.render_widget(paragraph, area);
+    let spans = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Min(40), Constraint::Length(12)])
+        .split(area);
+
+    let left_paragraph = Paragraph::new(left_text);
+    let right_paragraph = Paragraph::new(right_text);
+    f.render_widget(left_paragraph, spans[0]);
+    f.render_widget(right_paragraph, spans[1]);
 }
 
 fn render_search_input<T>(f: &mut Frame, app: &Picker<T>, area: Rect)
 where
-    T: Sync + Send,
+    T: Sync + Send + Display,
 {
     // Split the query at the cursor position
     let before_cursor = app.query.chars().take(app.query_index).collect::<String>();
@@ -102,7 +93,29 @@ where
     let input = Paragraph::new(line)
         .style(Style::default())
         .block(Block::default().borders(Borders::ALL).title("Search"));
-    f.render_widget(input, area);
+
+    let snapshot = app.snapshot();
+    let item_count_text = vec![Line::from(vec![Span::styled(
+        format!(
+            "{}/{}",
+            snapshot.matched_item_count(),
+            snapshot.item_count()
+        ),
+        Style::default().add_modifier(Modifier::BOLD),
+    )])
+    .right_aligned()];
+
+    let item_count: Paragraph<'_> = Paragraph::new(item_count_text)
+        .style(Style::default())
+        .block(Block::default().borders(Borders::ALL).title("Status"));
+
+    let spans = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Min(40), Constraint::Length(17)])
+        .split(area);
+
+    f.render_widget(input, spans[0]);
+    f.render_widget(item_count, spans[1]);
 }
 
 fn render_items<T>(f: &mut Frame, app: &mut Picker<T>, area: Rect)
