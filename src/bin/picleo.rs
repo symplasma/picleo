@@ -83,9 +83,12 @@ fn main() -> Result<()> {
 
         // Run app
         match picker.run() {
-            Ok(paths) => {
-                for path in paths {
+            Ok(selected_items) => {
+                for path in selected_items.existing_values() {
                     println!("{}", path.0.display())
+                }
+                for requested_path in selected_items.requested_values() {
+                    println!("{}", requested_path)
                 }
             }
             Err(err) => {
@@ -121,9 +124,12 @@ fn main() -> Result<()> {
 
         // Run app
         match picker.run() {
-            Ok(lines) => {
-                for line in lines {
+            Ok(selected_items) => {
+                for line in selected_items.existing_values() {
                     println!("{}", line)
+                }
+                for requested_line in selected_items.requested_values() {
+                    println!("{}", requested_line)
                 }
             }
             Err(err) => {
