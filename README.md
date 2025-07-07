@@ -17,8 +17,18 @@ The current development focus is on integrating this into a larger project as a 
 This is a mix of feature list and roadmap. Checked features are present in the current version. Unchecked features may be added in any order.
 
 - [x] Can handle selection of multiple items
+- [x] Can handle input on `stdin`
+- [x] List directory contents, with recursive option
+- [ ] List file contents
+- [ ] Support config via args and file
+- [ ] Builder pattern for config when used as a library
 - [ ] Allows custom sorting and re-sorting of items
 - [ ] Allows for the creation of items not originally in the matching set
+- [ ] Customizable headers and header lines
+- [ ] Support multi-column chooser with column naming
+- [ ] Choose columns to display with delimiter pattern
+- [ ] Choose columns to output with join string
+- [ ] Support prefix based filters and args e.g. `title:`
 - [ ] Has filtering options for fields besides those shown and fuzzy matched against
 - [x] Is fast for large numbers of items
 - [x] Allows the core functionality to be embedded in other software as a library
