@@ -23,7 +23,7 @@ This is a mix of feature list and roadmap. Checked features are present in the c
 - [ ] Support config via args and file
 - [ ] Builder pattern for config when used as a library
 - [ ] Allows custom sorting and re-sorting of items
-- [ ] Allows for the creation of items not originally in the matching set
+- [x] Allows for the creation of new items not originally in the input
 - [ ] Customizable headers and header lines
 - [ ] Support multi-column chooser with column naming
 - [ ] Choose columns to display with delimiter pattern
@@ -35,7 +35,7 @@ This is a mix of feature list and roadmap. Checked features are present in the c
 - [x] Can wrap arbitrary object types and return the whole objects after matches
 - [x] Supports mouse scroll wheel
 - [x] Middle-click to toggle item selection
-- [ ] Click on items to toggle item selection
+- [x] Click on items to toggle item selection
 - [ ] Preview command functionality
 - [ ] Running commands on selected entries
 
