@@ -716,17 +716,35 @@ where
                         event_received = true;
                         match mouse.kind {
                             MouseEventKind::ScrollUp => {
-                                if self.config.invert_scroll() {
-                                    self.next();
+                                // Check if Shift or Control is held for page navigation
+                                if mouse.modifiers.contains(KeyModifiers::SHIFT) || mouse.modifiers.contains(KeyModifiers::CONTROL) {
+                                    if self.config.invert_scroll() {
+                                        self.next_page();
+                                    } else {
+                                        self.previous_page();
+                                    }
                                 } else {
-                                    self.previous();
+                                    if self.config.invert_scroll() {
+                                        self.next();
+                                    } else {
+                                        self.previous();
+                                    }
                                 }
                             }
                             MouseEventKind::ScrollDown => {
-                                if self.config.invert_scroll() {
-                                    self.previous();
+                                // Check if Shift or Control is held for page navigation
+                                if mouse.modifiers.contains(KeyModifiers::SHIFT) || mouse.modifiers.contains(KeyModifiers::CONTROL) {
+                                    if self.config.invert_scroll() {
+                                        self.previous_page();
+                                    } else {
+                                        self.next_page();
+                                    }
                                 } else {
-                                    self.next();
+                                    if self.config.invert_scroll() {
+                                        self.previous();
+                                    } else {
+                                        self.next();
+                                    }
                                 }
                             }
                             MouseEventKind::Down(MouseButton::Left) => {
