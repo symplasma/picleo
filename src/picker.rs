@@ -317,6 +317,29 @@ where
         };
     }
 
+    pub(crate) fn handle_item_click(&mut self, mouse_row: u16) {
+        // Calculate which item was clicked based on the mouse row
+        // The items list starts at row 4 (help=1, search=3, items start at 4)
+        // and has a border, so the first item is at row 5
+        if mouse_row < 5 {
+            return; // Click was not on an item
+        }
+
+        let item_row = mouse_row - 5; // Adjust for UI layout
+        let clicked_index = self.first_visible_item_index + item_row as u32;
+
+        // Check if the clicked index is valid
+        if clicked_index >= self.matched_item_count() {
+            return;
+        }
+
+        // Toggle the selection of the clicked item
+        let snapshot = self.snapshot();
+        if let Some(item) = snapshot.get_matched_item(clicked_index) {
+            item.data.toggle_selected();
+        }
+    }
+
     pub(crate) fn append_to_query(&mut self, key: char) {
         // TODO constrain selected item to match range
         if self.query_index >= self.query.len() {
@@ -705,6 +728,10 @@ where
                                 } else {
                                     self.next();
                                 }
+                            }
+                            MouseEventKind::Down(MouseButton::Left) => {
+                                // Handle left click on item lines to toggle selection
+                                self.handle_item_click(mouse.row);
                             }
                             MouseEventKind::Down(MouseButton::Middle) => {
                                 self.toggle_selected();
