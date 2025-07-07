@@ -717,7 +717,9 @@ where
                         match mouse.kind {
                             MouseEventKind::ScrollUp => {
                                 // Check if Shift or Control is held for page navigation
-                                if mouse.modifiers.contains(KeyModifiers::SHIFT) || mouse.modifiers.contains(KeyModifiers::CONTROL) {
+                                if mouse.modifiers.contains(KeyModifiers::SHIFT)
+                                    || mouse.modifiers.contains(KeyModifiers::CONTROL)
+                                {
                                     if self.config.invert_scroll() {
                                         self.next_page();
                                     } else {
@@ -733,7 +735,9 @@ where
                             }
                             MouseEventKind::ScrollDown => {
                                 // Check if Shift or Control is held for page navigation
-                                if mouse.modifiers.contains(KeyModifiers::SHIFT) || mouse.modifiers.contains(KeyModifiers::CONTROL) {
+                                if mouse.modifiers.contains(KeyModifiers::SHIFT)
+                                    || mouse.modifiers.contains(KeyModifiers::CONTROL)
+                                {
                                     if self.config.invert_scroll() {
                                         self.previous_page();
                                     } else {
