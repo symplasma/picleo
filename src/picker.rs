@@ -161,7 +161,7 @@ where
             .snapshot()
             .matched_items(..)
             .filter(|i| i.data.is_selected())
-            .map(|i| i.data.value())
+            .filter_map(|i| i.data.value())
             .collect();
 
         if !selected_items.is_empty() {
@@ -170,7 +170,8 @@ where
             self.snapshot()
                 .matched_items(..)
                 .nth(self.current_index as usize)
-                .map(|i| vec![i.data.value()])
+                .and_then(|i| i.data.value())
+                .map(|v| vec![v])
                 .unwrap_or_default()
         }
     }
