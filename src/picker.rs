@@ -328,10 +328,10 @@ where
         // Get the currently selected item's text
         if let Some(current_item) = snapshot.get_matched_item(self.current_index) {
             let item_text = current_item.data.to_string();
-            
+
             // Create a new Requested item with the same text, in selected state
             let new_item = SelectableItem::new_requested_selected(item_text);
-            
+
             // Inject the new item into the picker
             let injector = self.matcher.injector();
             injector.push(new_item, |item, columns| {

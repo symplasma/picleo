@@ -5,14 +5,8 @@ use std::{
 
 #[derive(Debug)]
 pub enum SelectableItem<T> {
-    Existing {
-        value: T,
-        selected: AtomicBool,
-    },
-    Requested {
-        value: String,
-        selected: AtomicBool,
-    },
+    Existing { value: T, selected: AtomicBool },
+    Requested { value: String, selected: AtomicBool },
 }
 
 impl<T: Display> Display for SelectableItem<T> {
@@ -92,16 +86,24 @@ impl<T> SelectableItem<T> {
     // Set the selected state
     pub fn set_selected(&self, selected_state: bool) {
         match self {
-            SelectableItem::Existing { selected, .. } => selected.store(selected_state, Ordering::SeqCst),
-            SelectableItem::Requested { selected, .. } => selected.store(selected_state, Ordering::SeqCst),
+            SelectableItem::Existing { selected, .. } => {
+                selected.store(selected_state, Ordering::SeqCst)
+            }
+            SelectableItem::Requested { selected, .. } => {
+                selected.store(selected_state, Ordering::SeqCst)
+            }
         }
     }
 
     // Toggle the selected state
     pub fn toggle_selected(&self) {
         match self {
-            SelectableItem::Existing { selected, .. } => { selected.fetch_xor(true, Ordering::SeqCst); },
-            SelectableItem::Requested { selected, .. } => { selected.fetch_xor(true, Ordering::SeqCst); },
+            SelectableItem::Existing { selected, .. } => {
+                selected.fetch_xor(true, Ordering::SeqCst);
+            }
+            SelectableItem::Requested { selected, .. } => {
+                selected.fetch_xor(true, Ordering::SeqCst);
+            }
         }
     }
 
