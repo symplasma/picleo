@@ -30,10 +30,7 @@ impl<'a, T> SelectedItems<'a, T> {
 
     /// Returns a Vec of references to the inner values from Existing selected items
     pub fn existing_values(&self) -> Vec<&T> {
-        self.items
-            .iter()
-            .filter_map(|item| item.value())
-            .collect()
+        self.items.iter().filter_map(|item| item.value()).collect()
     }
 
     /// Returns a Vec of string references from Requested selected items
@@ -758,7 +755,7 @@ where
                                 self.toggle_selected();
                                 self.next();
                             }
-                            (KeyCode::Char('n'), KeyModifiers::CONTROL) => {
+                            (KeyCode::Char('d'), KeyModifiers::CONTROL) => {
                                 self.create_new_item();
                             }
 
