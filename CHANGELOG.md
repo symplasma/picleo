@@ -5,7 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.5 (2025-07-07)
+
+### Chore
+
+ - <csr-id-90103a3ed35a83eaed9c21b5c9e09d69f5742061/> Clean up some AI changes
+
+### Documentation
+
+ - <csr-id-be931272f14dba9c7e1d23c69e7055d85ee67978/> Add features to list
+ - <csr-id-97e1f3ed3a5fc327d7f2ee50a4e901616cf235d8/> Add usage and other info
+
+### New Features
+
+ - <csr-id-778f22fdca84ed1f01390db58df96c68df7c0364/> add mouse click support to toggle item selection
+ - <csr-id-8f516a0f42d9f65fb979b67c2f2bb05b5347e7de/> Escape clears query, then quits
+ - <csr-id-cd98d76040b734d326762ecd5945536bde527033/> Improve layout
+ - <csr-id-c33165347b2570cdee1f1b543aa081bf2eba8763/> Add `invert_scroll` config option to control mouse scroll direction
+ - <csr-id-45963e6078604e3c33bbfe584f0c711e7cd60d18/> Add figment-based configuration system with platform-appropriate config file support
+ - <csr-id-30ba8800cae9d8d4cee68e36089eb9fa4effcf18/> add middle-click support to toggle item selection
+ - <csr-id-3c46cae2cdd2316250875588b321d596b5a14131/> add mouse scroll support for picker navigation
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 10 commits contributed to the release.
+ - 10 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Add mouse click support to toggle item selection ([`778f22f`](https://github.com/symplasma/picleo/commit/778f22fdca84ed1f01390db58df96c68df7c0364))
+    - Escape clears query, then quits ([`8f516a0`](https://github.com/symplasma/picleo/commit/8f516a0f42d9f65fb979b67c2f2bb05b5347e7de))
+    - Add features to list ([`be93127`](https://github.com/symplasma/picleo/commit/be931272f14dba9c7e1d23c69e7055d85ee67978))
+    - Improve layout ([`cd98d76`](https://github.com/symplasma/picleo/commit/cd98d76040b734d326762ecd5945536bde527033))
+    - Add usage and other info ([`97e1f3e`](https://github.com/symplasma/picleo/commit/97e1f3ed3a5fc327d7f2ee50a4e901616cf235d8))
+    - Clean up some AI changes ([`90103a3`](https://github.com/symplasma/picleo/commit/90103a3ed35a83eaed9c21b5c9e09d69f5742061))
+    - Add `invert_scroll` config option to control mouse scroll direction ([`c331653`](https://github.com/symplasma/picleo/commit/c33165347b2570cdee1f1b543aa081bf2eba8763))
+    - Add figment-based configuration system with platform-appropriate config file support ([`45963e6`](https://github.com/symplasma/picleo/commit/45963e6078604e3c33bbfe584f0c711e7cd60d18))
+    - Add middle-click support to toggle item selection ([`30ba880`](https://github.com/symplasma/picleo/commit/30ba8800cae9d8d4cee68e36089eb9fa4effcf18))
+    - Add mouse scroll support for picker navigation ([`3c46cae`](https://github.com/symplasma/picleo/commit/3c46cae2cdd2316250875588b321d596b5a14131))
+</details>
+
 ## v0.1.4 (2025-07-06)
+
+<csr-id-30d47743a2f274727b93e36749c9871a8d32d974/>
+<csr-id-84a390c9a497199e5d0ebd85de83a975d199a3a8/>
+<csr-id-472bbe20a890566b4440cd31e3807d5e1546b7ac/>
+<csr-id-5a70a3672df309ccab090790b72d839011c5ded1/>
+<csr-id-a0138182ce82cc323a7fa5d94eb9cb0aceca8234/>
+<csr-id-54bdce889d04cefa624081b882c64451f5a2f840/>
+<csr-id-a5c49136fd0ea877ebbce60c3392cb0cc51eef19/>
 
 ### Chore
 
@@ -46,7 +102,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 20 commits contributed to the release over the course of 1 calendar day.
+ - 21 commits contributed to the release over the course of 1 calendar day.
  - 32 days passed between releases.
  - 20 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
@@ -58,6 +114,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release picleo v0.1.4 ([`b4b257b`](https://github.com/symplasma/picleo/commit/b4b257bb50805e0666ebbee022c68f428393dacc))
     - Add "no items found" screen ([`a8e53a5`](https://github.com/symplasma/picleo/commit/a8e53a50a718c654de32f5c43655d6617fcc49d5))
     - Finally got navigation working ([`b6b314a`](https://github.com/symplasma/picleo/commit/b6b314a1d8c96c1a7ded1dfad521201281070a64))
     - Convert a few calls to last_item_index ([`5a70a36`](https://github.com/symplasma/picleo/commit/5a70a3672df309ccab090790b72d839011c5ded1))
