@@ -318,6 +318,28 @@ where
         };
     }
 
+    pub fn create_new_item(&mut self) {
+        let snapshot = self.snapshot();
+
+        if snapshot.matched_item_count() == 0 {
+            return;
+        }
+
+        // Get the currently selected item's text
+        if let Some(current_item) = snapshot.get_matched_item(self.current_index) {
+            let item_text = current_item.data.to_string();
+            
+            // Create a new Requested item with the same text, in selected state
+            let new_item = SelectableItem::new_requested_selected(item_text);
+            
+            // Inject the new item into the picker
+            let injector = self.matcher.injector();
+            injector.push(new_item, |item, columns| {
+                columns[0] = item.to_string().into()
+            });
+        }
+    }
+
     pub(crate) fn handle_item_click(&mut self, mouse_row: u16) {
         // Calculate which item was clicked based on the mouse row
         // The items list starts at row 4 (help=1, search=3, items start at 4)
@@ -705,6 +727,9 @@ where
                             (KeyCode::Tab, KeyModifiers::NONE) => {
                                 self.toggle_selected();
                                 self.next();
+                            }
+                            (KeyCode::Char('n'), KeyModifiers::CONTROL) => {
+                                self.create_new_item();
                             }
 
                             // ignore other key codes
