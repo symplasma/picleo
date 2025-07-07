@@ -18,6 +18,33 @@ use std::{
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
+#[derive(Debug)]
+pub struct SelectedItems<'a, T> {
+    items: Vec<&'a SelectableItem<T>>,
+}
+
+impl<'a, T> SelectedItems<'a, T> {
+    pub fn from_refs(items: Vec<&'a SelectableItem<T>>) -> Self {
+        Self { items }
+    }
+
+    /// Returns a Vec of references to the inner values from Existing selected items
+    pub fn existing_values(&self) -> Vec<&T> {
+        self.items
+            .iter()
+            .filter_map(|item| item.value())
+            .collect()
+    }
+
+    /// Returns a Vec of string references from Requested selected items
+    pub fn requested_values(&self) -> Vec<&str> {
+        self.items
+            .iter()
+            .filter_map(|item| item.requested_value().map(|s| s.as_str()))
+            .collect()
+    }
+}
+
 // TODO convert static to a proper lifetime
 pub struct Picker<T>
 where
@@ -155,24 +182,27 @@ where
         self.height = height;
     }
 
-    pub(crate) fn selected_items(&self) -> Vec<&T> {
-        // NOTE: matched_items is not factored out due to ownership issues
-        let selected_items: Vec<&T> = self
+    pub(crate) fn selected_items(&self) -> SelectedItems<T> {
+        // Get all selected items as references
+        let selected_items: Vec<&SelectableItem<T>> = self
             .snapshot()
             .matched_items(..)
             .filter(|i| i.data.is_selected())
-            .filter_map(|i| i.data.value())
+            .map(|i| i.data)
             .collect();
 
         if !selected_items.is_empty() {
-            selected_items
+            SelectedItems::from_refs(selected_items)
         } else {
-            self.snapshot()
+            // If no items are selected, return the current item
+            let current_item: Vec<&SelectableItem<T>> = self
+                .snapshot()
                 .matched_items(..)
                 .nth(self.current_index as usize)
-                .and_then(|i| i.data.value())
-                .map(|v| vec![v])
-                .unwrap_or_default()
+                .map(|i| vec![i.data])
+                .unwrap_or_default();
+
+            SelectedItems::from_refs(current_item)
         }
     }
 
@@ -600,7 +630,7 @@ where
         );
     }
 
-    pub fn run(&mut self) -> AppResult<Vec<&T>> {
+    pub fn run(&mut self) -> AppResult<SelectedItems<T>> {
         // Setup terminal
         enable_raw_mode()?;
         // TODO should we allow the caller to pass any arbitrary stream?
@@ -626,7 +656,7 @@ where
     pub(crate) fn run_loop<B: ratatui::backend::Backend>(
         &mut self,
         terminal: &mut Terminal<B>,
-    ) -> AppResult<Vec<&T>> {
+    ) -> AppResult<SelectedItems<T>> {
         // draw the UI once initially before any timeouts so it appears to the user immediately
         terminal.draw(|f| ui(f, self))?;
 
@@ -681,7 +711,7 @@ where
                             }
                             (KeyCode::Esc, KeyModifiers::NONE) => {
                                 if self.query_is_empty() {
-                                    return Ok(vec![]);
+                                    return Ok(SelectedItems::from_refs(vec![]));
                                 } else {
                                     self.clear_query();
                                 }
@@ -691,7 +721,7 @@ where
                                 self.query_index = 0;
                             }
                             (KeyCode::Char('c'), KeyModifiers::CONTROL) => {
-                                return Ok(vec![]);
+                                return Ok(SelectedItems::from_refs(vec![]));
                             }
                             (KeyCode::Char('a'), KeyModifiers::CONTROL) => {
                                 self.query_index = 0;
