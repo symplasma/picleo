@@ -680,7 +680,7 @@ where
 
     pub(crate) fn create_item_from_editing_text(&mut self) {
         if !self.editing_text.is_empty() {
-            let new_item = SelectableItem::new_requested(self.editing_text.clone());
+            let new_item = SelectableItem::new_requested_selected(self.editing_text.clone());
             let injector = self.matcher.injector();
             injector.push(new_item, |item, columns| {
                 columns[0] = item.to_string().into()
