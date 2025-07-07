@@ -364,25 +364,18 @@ where
         };
     }
 
-    pub fn create_new_item(&mut self) {
+    pub fn current_item_text(&self) -> String {
         let snapshot = self.snapshot();
 
         if snapshot.matched_item_count() == 0 {
-            return;
+            return String::new();
         }
 
         // Get the currently selected item's text
         if let Some(current_item) = snapshot.get_matched_item(self.current_index) {
-            let item_text = current_item.data.to_string();
-
-            // Create a new Requested item with the same text, in selected state
-            let new_item = SelectableItem::new_requested_selected(item_text);
-
-            // Inject the new item into the picker
-            let injector = self.matcher.injector();
-            injector.push(new_item, |item, columns| {
-                columns[0] = item.to_string().into()
-            });
+            current_item.data.to_string()
+        } else {
+            String::new()
         }
     }
 
@@ -666,9 +659,9 @@ where
         self.editing_index = 0;
     }
 
-    pub(crate) fn enter_editing_mode(&mut self) {
+    pub(crate) fn enter_editing_mode(&mut self, item_text: String) {
         self.mode = PickerMode::Editing;
-        self.editing_text.clear();
+        self.editing_text = item_text;
         self.editing_index = 0;
     }
 
@@ -847,10 +840,10 @@ where
                         self.next();
                     }
                     (KeyCode::Char('d'), KeyModifiers::CONTROL) => {
-                        self.create_new_item();
+                        self.enter_editing_mode(self.current_item_text());
                     }
                     (KeyCode::Char('n'), KeyModifiers::CONTROL) => {
-                        self.enter_editing_mode();
+                        self.enter_editing_mode(String::new());
                     }
 
                     // ignore other key codes
