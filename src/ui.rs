@@ -1,4 +1,4 @@
-use crate::picker::{Picker, PickerMode};
+use crate::picker::Picker;
 use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
