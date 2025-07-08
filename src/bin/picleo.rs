@@ -53,47 +53,104 @@ fn main() -> Result<()> {
     // TODO wrap item loading in a spawned thread so we don't block the UI
     // Load items
     if !args.dirs.is_empty() {
-        // Create app state
-        let mut picker = Picker::<DisplayPath>::new();
+        // Check if we have any files vs directories to determine picker type
+        let has_files = args.dirs.iter().any(|path| path.is_file());
+        let has_dirs = args.dirs.iter().any(|path| path.is_dir());
 
-        // List files from directories
-        for dir in args.dirs {
-            if args.threaded {
-                picker.inject_items_threaded(move |i| {
-                    if args.recursive {
-                        // Recursively walk the directory
-                        walk_dir_recursive(&dir, i);
-                    } else {
-                        // Non-recursive: only list direct children
-                        walk_dir(dir, i);
-                    }
-                });
-            } else {
-                picker.inject_items(|i| {
-                    if args.recursive {
-                        // Recursively walk the directory
-                        walk_dir_recursive(&dir, i);
-                    } else {
-                        // Non-recursive: only list direct children
-                        walk_dir(dir, i);
-                    }
-                });
-            }
-        }
+        if has_files && !has_dirs {
+            // Only files - use String picker for file contents
+            let mut picker = Picker::<String>::new();
 
-        // Run app
-        match picker.run() {
-            Ok(selected_items) => {
-                for path in selected_items.existing_values() {
-                    println!("{}", path.0.display())
-                }
-                for requested_path in selected_items.requested_values() {
-                    println!("{}", requested_path)
+            for file_path in args.dirs {
+                if file_path.is_file() {
+                    if args.threaded {
+                        picker.inject_items_threaded(move |i| {
+                            read_file_lines(&file_path, i);
+                        });
+                    } else {
+                        picker.inject_items(|i| {
+                            read_file_lines(&file_path, i);
+                        });
+                    }
                 }
             }
-            Err(err) => {
-                println!("{err:?}");
-                return Err(anyhow::anyhow!("{:?}", err));
+
+            // Run app
+            match picker.run() {
+                Ok(selected_items) => {
+                    for line in selected_items.existing_values() {
+                        println!("{}", line)
+                    }
+                    for requested_line in selected_items.requested_values() {
+                        println!("{}", requested_line)
+                    }
+                }
+                Err(err) => {
+                    println!("{err:?}");
+                    return Err(anyhow::anyhow!("{:?}", err));
+                }
+            }
+        } else {
+            // Has directories or mixed - use DisplayPath picker for file paths
+            let mut picker = Picker::<DisplayPath>::new();
+
+            for path in args.dirs {
+                if path.is_file() {
+                    // Add the file itself to the picker
+                    if args.threaded {
+                        picker.inject_items_threaded(move |i| {
+                            i.push(SelectableItem::new(DisplayPath(path)), |item, columns| {
+                                columns[0] = item.to_string().into()
+                            });
+                        });
+                    } else {
+                        picker.inject_items(|i| {
+                            i.push(
+                                SelectableItem::new(DisplayPath(path.clone())),
+                                |item, columns| columns[0] = item.to_string().into(),
+                            );
+                        });
+                    }
+                } else if path.is_dir() {
+                    // Handle directory as before
+                    if args.threaded {
+                        picker.inject_items_threaded(move |i| {
+                            if args.recursive {
+                                // Recursively walk the directory
+                                walk_dir_recursive(&path, i);
+                            } else {
+                                // Non-recursive: only list direct children
+                                walk_dir(path, i);
+                            }
+                        });
+                    } else {
+                        picker.inject_items(|i| {
+                            if args.recursive {
+                                // Recursively walk the directory
+                                walk_dir_recursive(&path, i);
+                            } else {
+                                // Non-recursive: only list direct children
+                                walk_dir(path, i);
+                            }
+                        });
+                    }
+                }
+            }
+
+            // Run app
+            match picker.run() {
+                Ok(selected_items) => {
+                    for path in selected_items.existing_values() {
+                        println!("{}", path.0.display())
+                    }
+                    for requested_path in selected_items.requested_values() {
+                        println!("{}", requested_path)
+                    }
+                }
+                Err(err) => {
+                    println!("{err:?}");
+                    return Err(anyhow::anyhow!("{:?}", err));
+                }
             }
         }
     } else {
@@ -164,6 +221,16 @@ fn walk_dir_recursive(dir: &PathBuf, injector: &nucleo::Injector<SelectableItem<
                     columns[0] = item.to_string().into()
                 });
             }
+        }
+    }
+}
+
+fn read_file_lines(file_path: &PathBuf, injector: &nucleo::Injector<SelectableItem<String>>) {
+    if let Ok(contents) = fs::read_to_string(file_path) {
+        for line in contents.lines() {
+            injector.push(SelectableItem::new(line.to_string()), |item, columns| {
+                columns[0] = item.to_string().into()
+            });
         }
     }
 }
