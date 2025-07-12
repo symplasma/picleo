@@ -19,7 +19,9 @@ This is a mix of feature list and roadmap. Checked features are present in the c
 - [x] Can handle selection of multiple items
 - [x] Can handle input on `stdin`
 - [x] List directory contents, with recursive option
-- [ ] List file contents
+- [x] List file contents
+- [ ] Preview command functionality
+- [ ] Running commands on selected entries
 - [ ] Support config via args and file
 - [ ] Builder pattern for config when used as a library
 - [ ] Allows custom sorting and re-sorting of items
@@ -36,8 +38,6 @@ This is a mix of feature list and roadmap. Checked features are present in the c
 - [x] Supports mouse scroll wheel
 - [x] Middle-click to toggle item selection
 - [x] Click on items to toggle item selection
-- [ ] Preview command functionality
-- [ ] Running commands on selected entries
 
 Due to the excellent design of [nucleo](https://docs.rs/nucleo/0.5.0/nucleo/) we are able to load matches in separate threads while the user starts searching. Currently, the `--threaded` option controls whether we perform item loads in separate threads. Only one thread is used to load arguments from `STDIN` while one thread per arg is used when passing file path arguments.
 
