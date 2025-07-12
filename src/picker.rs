@@ -432,7 +432,7 @@ where
                 let substituted_command = self.substitute_placeholders(command, &item_text);
 
                 // Execute the command in a subshell
-                match Command::new("sh")
+                match Command::new("zsh")
                     .arg("-c")
                     .arg(&substituted_command)
                     .output()
