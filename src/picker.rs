@@ -16,6 +16,7 @@ use std::{
     error, fmt::Display, io, ops::RangeInclusive, process::Command, sync::Arc, thread::JoinHandle,
     time::Duration,
 };
+use shell_escape;
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
@@ -406,17 +407,19 @@ where
     fn substitute_placeholders(&self, command: &str, item_text: &str) -> String {
         let mut result = command.to_string();
 
-        // Replace {} and {0} with the whole line
-        result = result.replace("{}", item_text);
-        result = result.replace("{0}", item_text);
+        // Replace {} and {0} with the whole line (escaped)
+        let escaped_item_text = shell_escape::escape(item_text.into());
+        result = result.replace("{}", &escaped_item_text);
+        result = result.replace("{0}", &escaped_item_text);
 
         // Split the item text by whitespace to get columns
         let columns: Vec<&str> = item_text.split_whitespace().collect();
 
-        // Replace {1}, {2}, etc. with column values (1-indexed)
+        // Replace {1}, {2}, etc. with column values (1-indexed, escaped)
         for (i, column) in columns.iter().enumerate() {
             let placeholder = format!("{{{}}}", i + 1);
-            result = result.replace(&placeholder, column);
+            let escaped_column = shell_escape::escape((*column).into());
+            result = result.replace(&placeholder, &escaped_column);
         }
 
         // TODO: Add support for named column placeholders like {column_name}
