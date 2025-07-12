@@ -45,6 +45,10 @@ struct Args {
     /// Use threaded injection for better performance
     #[arg(short, long)]
     threaded: bool,
+
+    /// Preview command with placeholders like {1}, {2}, or {column_name}
+    #[arg(short, long)]
+    preview: Option<String>,
 }
 
 fn main() -> Result<()> {
@@ -66,11 +70,15 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
 
     // these are here to prevent lifetime issues since args is a reference, error: borrowed data escapes outside of function
     let dirs = args.dirs;
+    let preview_command = args.preview;
 
     // Check if we have any files vs directories to determine picker type
     if has_files && !has_dirs {
         // Only files - use String picker for file contents
         let mut picker = Picker::<String>::new();
+        if let Some(preview_cmd) = preview_command.clone() {
+            picker.set_preview_command(preview_cmd);
+        }
 
         for file_path in dirs {
             if file_path.is_file() {
@@ -104,6 +112,9 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
     } else {
         // Has directories or mixed - use DisplayPath picker for file paths
         let mut picker = Picker::<DisplayPath>::new();
+        if let Some(preview_cmd) = preview_command {
+            picker.set_preview_command(preview_cmd);
+        }
 
         for path in dirs {
             if path.is_file() {
@@ -169,6 +180,9 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
 
 fn load_from_stdin(args: Args) -> Result<(), anyhow::Error> {
     let mut picker = Picker::<String>::new();
+    if let Some(preview_cmd) = args.preview {
+        picker.set_preview_command(preview_cmd);
+    }
     if args.threaded {
         picker.inject_items_threaded(|i| {
             // Read from stdin

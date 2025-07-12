@@ -24,6 +24,9 @@ pub struct Config {
 
     /// Invert mouse scroll direction
     pub invert_scroll: Option<bool>,
+
+    /// Default preview command
+    pub preview_command: Option<String>,
 }
 
 impl Default for Config {
@@ -35,6 +38,7 @@ impl Default for Config {
             normalization: Some("smart".to_string()),
             wrap_around: Some(true),
             invert_scroll: Some(false),
+            preview_command: None,
         }
     }
 }
@@ -100,5 +104,10 @@ impl Config {
     /// Get the invert scroll setting, falling back to default if not configured
     pub fn invert_scroll(&self) -> bool {
         self.invert_scroll.unwrap_or(false)
+    }
+
+    /// Get the preview command setting
+    pub fn preview_command(&self) -> Option<&String> {
+        self.preview_command.as_ref()
     }
 }

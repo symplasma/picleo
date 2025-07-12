@@ -13,7 +13,8 @@ use nucleo::{
 };
 use ratatui::{prelude::CrosstermBackend, Terminal};
 use std::{
-    error, fmt::Display, io, ops::RangeInclusive, sync::Arc, thread::JoinHandle, time::Duration,
+    error, fmt::Display, io, ops::RangeInclusive, process::Command, sync::Arc, thread::JoinHandle,
+    time::Duration,
 };
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -71,6 +72,8 @@ where
     pub editing_index: usize,
     pub join_handles: Vec<JoinHandle<()>>,
     pub config: Config,
+    pub preview_command: Option<String>,
+    pub preview_output: String,
 }
 
 impl<T: Sync + Send + Display> Default for Picker<T> {
@@ -87,6 +90,7 @@ where
     pub fn new() -> Self {
         let config = Config::load().unwrap_or_default();
         let matcher = Nucleo::new(NucleoConfig::DEFAULT, Arc::new(|| {}), None, 1);
+        let preview_command = config.preview_command().cloned();
         Picker {
             matcher,
             first_visible_item_index: 0,
@@ -99,6 +103,8 @@ where
             editing_index: 0,
             join_handles: Vec::new(),
             config,
+            preview_command,
+            preview_output: String::new(),
         }
     }
 
@@ -294,6 +300,7 @@ where
         }
 
         self.set_current_index((self.current_index + 1).into(), None);
+        self.update_preview();
     }
 
     fn next_page(&mut self) {
@@ -308,6 +315,7 @@ where
             self.current_index + self.height() as u32
         };
         self.set_current_index(next_page_index.into(), Some(false));
+        self.update_preview();
     }
 
     fn end(&mut self) {
@@ -317,6 +325,7 @@ where
         }
 
         self.set_current_index(indices.into(), Some(false));
+        self.update_preview();
     }
 
     pub fn previous(&mut self) {
@@ -326,6 +335,7 @@ where
         }
 
         self.set_current_index(self.current_index as i64 - 1, None);
+        self.update_preview();
     }
 
     pub fn previous_page(&mut self) {
@@ -340,6 +350,7 @@ where
             self.current_index as i64 - self.height() as i64
         };
         self.set_current_index(previous_page_index, Some(false));
+        self.update_preview();
     }
 
     fn home(&mut self) {
@@ -349,6 +360,7 @@ where
         }
 
         self.set_current_index(0, Some(false));
+        self.update_preview();
     }
 
     pub fn toggle_selected(&mut self) {
@@ -376,6 +388,72 @@ where
             current_item.data.to_string()
         } else {
             String::new()
+        }
+    }
+
+    pub fn set_preview_command(&mut self, command: String) {
+        self.preview_command = Some(command);
+    }
+
+    pub fn has_preview(&self) -> bool {
+        self.preview_command.is_some()
+    }
+
+    pub fn preview_output(&self) -> &str {
+        &self.preview_output
+    }
+
+    fn substitute_placeholders(&self, command: &str, item_text: &str) -> String {
+        let mut result = command.to_string();
+
+        // Replace {} and {0} with the whole line
+        result = result.replace("{}", item_text);
+        result = result.replace("{0}", item_text);
+
+        // Split the item text by whitespace to get columns
+        let columns: Vec<&str> = item_text.split_whitespace().collect();
+
+        // Replace {1}, {2}, etc. with column values (1-indexed)
+        for (i, column) in columns.iter().enumerate() {
+            let placeholder = format!("{{{}}}", i + 1);
+            result = result.replace(&placeholder, column);
+        }
+
+        // TODO: Add support for named column placeholders like {column_name}
+        // This would require additional metadata about column names
+
+        result
+    }
+
+    pub fn update_preview(&mut self) {
+        if let Some(ref command) = self.preview_command.clone() {
+            let item_text = self.current_item_text();
+            if !item_text.is_empty() {
+                let substituted_command = self.substitute_placeholders(command, &item_text);
+
+                // Execute the command in a subshell
+                match Command::new("sh")
+                    .arg("-c")
+                    .arg(&substituted_command)
+                    .output()
+                {
+                    Ok(output) => {
+                        self.preview_output = String::from_utf8_lossy(&output.stdout).to_string();
+                        if !output.stderr.is_empty() {
+                            let stderr = String::from_utf8_lossy(&output.stderr);
+                            if !self.preview_output.is_empty() {
+                                self.preview_output.push_str("\n--- stderr ---\n");
+                            }
+                            self.preview_output.push_str(&stderr);
+                        }
+                    }
+                    Err(e) => {
+                        self.preview_output = format!("Error executing preview command: {}", e);
+                    }
+                }
+            } else {
+                self.preview_output.clear();
+            }
         }
     }
 
@@ -419,6 +497,7 @@ where
         // ensure that the selection stays in range
         // TODO find a better way, ideally one that preserves the position as much as possible
         self.set_current_index(0, Some(false));
+        self.update_preview();
     }
 
     pub(crate) fn append_to_editing_text(&mut self, key: char) {
@@ -709,6 +788,9 @@ where
         &mut self,
         terminal: &mut Terminal<B>,
     ) -> AppResult<SelectedItems<T>> {
+        // Update preview initially if we have a preview command
+        self.update_preview();
+
         // draw the UI once initially before any timeouts so it appears to the user immediately
         terminal.draw(|f| ui(f, self))?;
 

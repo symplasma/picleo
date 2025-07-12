@@ -12,26 +12,59 @@ pub fn ui<T>(f: &mut Frame, app: &mut Picker<T>)
 where
     T: Sync + Send + Display,
 {
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints(
-            [
-                Constraint::Length(1),
-                Constraint::Length(3),
-                Constraint::Min(1),
-            ]
-            .as_ref(),
-        )
-        .split(f.area());
+    if app.has_preview() {
+        // Split screen horizontally for preview mode
+        let main_chunks = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+            .split(f.area());
 
-    // update the height before rendering so this doesn't get out of sync
-    // TODO ensure that 3 is always correct or pull the correct value that takes terminal resizing into account
-    app.update_height(chunks[2].height - 3);
+        // Left side - normal picker interface
+        let left_chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(
+                [
+                    Constraint::Length(1),
+                    Constraint::Length(3),
+                    Constraint::Min(1),
+                ]
+                .as_ref(),
+            )
+            .split(main_chunks[0]);
 
-    // render the sections of the display now that everything is setup and updated
-    render_help(f, chunks[0], app);
-    render_search_input(f, app, chunks[1]);
-    render_items(f, app, chunks[2]);
+        // update the height before rendering so this doesn't get out of sync
+        app.update_height(left_chunks[2].height - 3);
+
+        // render the sections of the display now that everything is setup and updated
+        render_help(f, left_chunks[0], app);
+        render_search_input(f, app, left_chunks[1]);
+        render_items(f, app, left_chunks[2]);
+
+        // Right side - preview
+        render_preview(f, app, main_chunks[1]);
+    } else {
+        // Normal full-screen mode
+        let chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(
+                [
+                    Constraint::Length(1),
+                    Constraint::Length(3),
+                    Constraint::Min(1),
+                ]
+                .as_ref(),
+            )
+            .split(f.area());
+
+        // update the height before rendering so this doesn't get out of sync
+        // TODO ensure that 3 is always correct or pull the correct value that takes terminal resizing into account
+        app.update_height(chunks[2].height - 3);
+
+        // render the sections of the display now that everything is setup and updated
+        render_help(f, chunks[0], app);
+        render_search_input(f, app, chunks[1]);
+        render_items(f, app, chunks[2]);
+    }
 }
 
 fn render_help<T>(f: &mut Frame, area: Rect, app: &Picker<T>)
@@ -179,4 +212,21 @@ where
         let no_items_paragraph = Paragraph::new("No items found").alignment(Alignment::Center);
         f.render_widget(no_items_paragraph, chunks[1]);
     }
+}
+
+fn render_preview<T>(f: &mut Frame, app: &Picker<T>, area: Rect)
+where
+    T: Sync + Send + Display,
+{
+    let preview_text = app.preview_output();
+    let lines: Vec<Line> = preview_text
+        .lines()
+        .map(|line| Line::from(line.to_string()))
+        .collect();
+
+    let preview = Paragraph::new(lines)
+        .block(Block::default().borders(Borders::ALL).title("Preview"))
+        .wrap(ratatui::widgets::Wrap { trim: false });
+
+    f.render_widget(preview, area);
 }
