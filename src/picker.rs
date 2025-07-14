@@ -12,11 +12,11 @@ use nucleo::{
     Config as NucleoConfig, Injector, Nucleo, Snapshot,
 };
 use ratatui::{prelude::CrosstermBackend, Terminal};
+use shell_escape;
 use std::{
     error, fmt::Display, io, ops::RangeInclusive, process::Command, sync::Arc, thread::JoinHandle,
     time::Duration,
 };
-use shell_escape;
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
@@ -434,6 +434,7 @@ where
             if !item_text.is_empty() {
                 let substituted_command = self.substitute_placeholders(command, &item_text);
 
+                // AI! execute the command directly, not inside shells
                 // Execute the command in a subshell
                 match Command::new("zsh")
                     .arg("-c")
