@@ -434,13 +434,12 @@ where
             if !item_text.is_empty() {
                 let substituted_command = self.substitute_placeholders(command, &item_text);
 
-                // AI! execute the command directly, not inside shells
-                // Execute the command in a subshell
-                match Command::new("zsh")
-                    .arg("-c")
-                    .arg(&substituted_command)
-                    .output()
-                {
+                // Parse and execute the command directly
+                let mut parts = substituted_command.split_whitespace();
+                let program = parts.next().unwrap_or("");
+                let args: Vec<&str> = parts.collect();
+
+                match Command::new(program).args(&args).output() {
                     Ok(output) => {
                         self.preview_output = String::from_utf8_lossy(&output.stdout).to_string();
                         if !output.stderr.is_empty() {
