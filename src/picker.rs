@@ -431,12 +431,14 @@ where
     pub fn update_preview(&mut self) {
         if let Some(ref command) = self.preview_command.clone() {
             let item_text = self.current_item_text();
-            if !item_text.is_empty() {
-                let substituted_command = self.substitute_placeholders(command, &item_text);
+            if item_text.is_empty() {
+                self.preview_output.clear();
+            }
+            let substituted_command = self.substitute_placeholders(command, &item_text);
 
-                // Parse and execute the command directly
-                let mut parts = substituted_command.split_whitespace();
-                let program = parts.next().unwrap_or("");
+            // Parse and execute the command directly
+            let mut parts = substituted_command.split_whitespace();
+            if let Some(program) = parts.next() {
                 let args: Vec<&str> = parts.collect();
 
                 match Command::new(program).args(&args).output() {
