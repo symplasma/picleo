@@ -793,17 +793,35 @@ where
         &mut self,
         terminal: &mut Terminal<B>,
     ) -> AppResult<SelectedItems<T>> {
-        // Update preview initially if we have a preview command
-        self.update_preview();
-
-        // draw the UI once initially before any timeouts so it appears to the user immediately
-        terminal.draw(|f| ui(f, self))?;
+        // setting this to true initially to trigger the initial screen paint
+        let mut redraw_requested = true;
 
         // enter the actual event loop
         loop {
+            // draw the UI before any timeouts so it appears to the user immediately
+            // redraw the UI if any of the below are true
+            //   1. a redraw is requested by an event
+            //   2. the matcher's status has changed
+            //   3. injectors are still running and adding items
+            if redraw_requested {
+                terminal.draw(|f| ui(f, self))?;
+            }
+
+            // toggling this back to the default, it will be switched back to true below on appropriate conditions
+            redraw_requested = false;
+
             // we must call this to keep Nucleo up to date
             let status = self.tick(10);
-            let mut redraw_requested = false;
+            // NOTE: do NOT try to move this logic into the event logic, there are non-event changes that need to trigger redraws
+            if status.changed || status.running {
+                // TODO need to debounce events here
+
+                // Update preview initially if we have a preview command
+                // TODO determine if this is the right place to update the preview
+                self.update_preview();
+
+                redraw_requested = true;
+            }
 
             // ensure that we update the UI, even when we aren't receiving events from the user
             if event::poll(Duration::from_millis(16))? {
@@ -815,15 +833,6 @@ where
                     EventResponse::ExitProgram => return Ok(SelectedItems::from_refs(vec![])),
                     EventResponse::ReturnSelectedItems => return Ok(self.selected_items()),
                 }
-            }
-
-            // redraw the UI if any of the below are true
-            //   1. a redraw is requested by an event
-            //   2. the matcher's status has changed
-            //   3. injectors are still running and adding items
-            if redraw_requested || status.changed || status.running {
-                // TODO need to debounce events here
-                terminal.draw(|f| ui(f, self))?;
             }
         }
     }
