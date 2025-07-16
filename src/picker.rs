@@ -407,11 +407,13 @@ where
     fn substitute_placeholders(&self, command: &str, item_text: &str) -> String {
         let mut result = command.to_string();
 
+        // TODO make this more lazy/efficient
         // Replace {} and {0} with the whole line (escaped)
         let escaped_item_text = shell_escape::escape(item_text.into());
         result = result.replace("{}", &escaped_item_text);
         result = result.replace("{0}", &escaped_item_text);
 
+        // TODO add support for user specified delimiters
         // Split the item text by whitespace to get columns
         let columns: Vec<&str> = item_text.split_whitespace().collect();
 
@@ -443,7 +445,13 @@ where
 
                 match Command::new(program).args(&args).output() {
                     Ok(output) => {
+                        // TODO make this string safe for display
+                        //      handle odd bytes
+                        //      remove ansi codes except colors
+                        //      clean unicode?
                         self.preview_output = String::from_utf8_lossy(&output.stdout).to_string();
+
+                        // handle output on STDERR
                         if !output.stderr.is_empty() {
                             let stderr = String::from_utf8_lossy(&output.stderr);
                             if !self.preview_output.is_empty() {
