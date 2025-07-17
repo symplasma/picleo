@@ -1,4 +1,7 @@
-use crate::picker::{EventResponse, Picker};
+use crate::{
+    picker::{EventResponse, Picker},
+    selectable::SelectableItem,
+};
 use crossterm::event::{Event, KeyCode, KeyModifiers};
 use std::fmt::Display;
 
@@ -58,5 +61,36 @@ where
             // ignore other event types
             _ => EventResponse::NoAction,
         }
+    }
+
+    pub(crate) fn append_to_editing_text(&mut self, key: char) {
+        if self.editing_index >= self.editing_text.len() {
+            self.editing_text.push(key);
+        } else {
+            self.editing_text.insert(self.editing_index, key);
+        }
+    }
+
+    pub(crate) fn delete_from_editing_text(&mut self) {
+        if self.editing_index > 0 && !self.editing_text.is_empty() {
+            // Remove the character before the cursor
+            self.editing_text.remove(self.editing_index - 1);
+        }
+    }
+
+    pub(crate) fn clear_editing_text(&mut self) {
+        self.editing_text.clear();
+        self.editing_index = 0;
+    }
+
+    pub(crate) fn create_item_from_editing_text(&mut self) {
+        if !self.editing_text.is_empty() {
+            let new_item = SelectableItem::new_requested_selected(self.editing_text.clone());
+            let injector = self.matcher.injector();
+            injector.push(new_item, |item, columns| {
+                columns[0] = item.to_string().into()
+            });
+        }
+        self.exit_editing_mode();
     }
 }
