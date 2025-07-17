@@ -3,6 +3,7 @@ use crate::{
     selectable::SelectableItem,
     selected_items::SelectedItems,
 };
+use comma::parse_command;
 use crossterm::event::{Event, KeyCode, KeyModifiers, MouseButton, MouseEventKind};
 use nucleo::pattern::{CaseMatching, Normalization};
 use std::{fmt::Display, ops::RangeInclusive, process::Command};
@@ -600,12 +601,16 @@ where
         &self.preview_output
     }
 
-    fn substitute_placeholders(&self, command: &str, item_text: &str) -> String {
+    fn substitute_placeholders(&self, command: &str, item_text: &str, escape: bool) -> String {
         let mut result = command.to_string();
 
         // TODO make this more lazy/efficient
         // Replace {} and {0} with the whole line (escaped)
-        let escaped_item_text = shell_escape::escape(item_text.into());
+        let escaped_item_text = if escape {
+            shell_escape::escape(item_text.into())
+        } else {
+            item_text.into()
+        };
         result = result.replace("{}", &escaped_item_text);
         result = result.replace("{0}", &escaped_item_text);
 
@@ -613,10 +618,15 @@ where
         // Split the item text by whitespace to get columns
         let columns: Vec<&str> = item_text.split_whitespace().collect();
 
+        // TODO make this more efficient, instead of iterating look for the index in the pattern and pull by offset
         // Replace {1}, {2}, etc. with column values (1-indexed, escaped)
         for (i, column) in columns.iter().enumerate() {
             let placeholder = format!("{{{}}}", i + 1);
-            let escaped_column = shell_escape::escape((*column).into());
+            let escaped_column = if escape {
+                shell_escape::escape((*column).into())
+            } else {
+                (*column).into()
+            };
             result = result.replace(&placeholder, &escaped_column);
         }
 
@@ -632,37 +642,45 @@ where
             if item_text.is_empty() {
                 self.preview_output.clear();
             }
-            let substituted_command = self.substitute_placeholders(command, &item_text);
 
-            // Parse and execute the command directly
-            let mut parts = substituted_command.split_whitespace();
-            if let Some(program) = parts.next() {
-                let args: Vec<&str> = parts.collect();
+            if let Some(command_parts) = parse_command(&command) {
+                let mut command_parts_iter = command_parts.iter();
+                if let Some(program) = command_parts_iter.next() {
+                    // we are substituting args separately to minimize whitespace issues
+                    // we could also substitute the whole command while injecting quoted strings and then split
+                    let args: Vec<String> = command_parts_iter
+                        .map(|arg| self.substitute_placeholders(arg, &item_text, false))
+                        .collect();
 
-                match Command::new(program).args(&args).output() {
-                    Ok(output) => {
-                        // TODO make this string safe for display
-                        //      handle odd bytes
-                        //      remove ansi codes except colors
-                        //      clean unicode?
-                        self.preview_output = String::from_utf8_lossy(&output.stdout).to_string();
+                    match Command::new(program).args(&args).output() {
+                        Ok(output) => {
+                            // TODO make this string safe for display
+                            //      handle odd bytes
+                            //      remove ansi codes except colors
+                            //      clean unicode?
+                            self.preview_output =
+                                String::from_utf8_lossy(&output.stdout).to_string();
 
-                        // handle output on STDERR
-                        if !output.stderr.is_empty() {
-                            let stderr = String::from_utf8_lossy(&output.stderr);
-                            if !self.preview_output.is_empty() {
-                                self.preview_output.push_str("\n--- stderr ---\n");
+                            // handle output on STDERR
+                            if !output.stderr.is_empty() {
+                                let stderr = String::from_utf8_lossy(&output.stderr);
+                                if !self.preview_output.is_empty() {
+                                    self.preview_output.push_str("\n--- stderr ---\n");
+                                }
+                                self.preview_output.push_str(&stderr);
                             }
-                            self.preview_output.push_str(&stderr);
+                            return;
+                        }
+                        Err(e) => {
+                            self.preview_output = format!("Error executing preview command: {}", e);
+                            return;
                         }
                     }
-                    Err(e) => {
-                        self.preview_output = format!("Error executing preview command: {}", e);
-                    }
                 }
-            } else {
-                self.preview_output.clear();
             }
+
+            // if anything above failed, clear the preview output
+            self.preview_output.clear();
         }
     }
 
