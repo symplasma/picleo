@@ -835,13 +835,20 @@ where
             if event::poll(Duration::from_millis(16))? {
                 // read the event that is ready (normally read blocks, but we're polling until it's ready)
                 let event = event::read()?;
-                match self.search_mode_handle_event(event) {
+                match self.handle_event_by_mode(event) {
                     EventResponse::NoAction => {}
                     EventResponse::UpdateUI => redraw_requested = true,
                     EventResponse::ExitProgram => return Ok(SelectedItems::from_refs(vec![])),
                     EventResponse::ReturnSelectedItems => return Ok(self.selected_items()),
                 }
             }
+        }
+    }
+
+    fn handle_event_by_mode(&mut self, event: Event) -> EventResponse {
+        match self.mode {
+            PickerMode::Search => self.search_mode_handle_event(event),
+            PickerMode::Editing => self.editing_mode_handle_event(event),
         }
     }
 
@@ -852,11 +859,6 @@ where
         match event {
             Event::Key(key) => {
                 event_response = EventResponse::UpdateUI;
-
-                // Handle mode-specific events first
-                if self.mode == PickerMode::Editing {
-                    return self.handle_editing_mode_key_event(key);
-                }
 
                 match (key.code, key.modifiers) {
                     (KeyCode::Char(key), KeyModifiers::NONE)
@@ -1015,47 +1017,55 @@ where
     }
 
     /// Handle key events when in editing mode
-    fn handle_editing_mode_key_event(&mut self, key: crossterm::event::KeyEvent) -> EventResponse {
-        match (key.code, key.modifiers) {
-            (KeyCode::Char(ch), KeyModifiers::NONE) | (KeyCode::Char(ch), KeyModifiers::SHIFT) => {
-                self.append_to_editing_text(ch);
-                self.editing_index = self.editing_index.saturating_add(1);
-                EventResponse::UpdateUI
-            }
-            (KeyCode::Backspace, KeyModifiers::NONE) => {
-                self.delete_from_editing_text();
-                self.editing_index = self.editing_index.saturating_sub(1);
-                EventResponse::UpdateUI
-            }
-            (KeyCode::Right, KeyModifiers::NONE) => {
-                self.editing_index = (self.editing_index + 1).min(self.editing_text.len());
-                EventResponse::UpdateUI
-            }
-            (KeyCode::Left, KeyModifiers::NONE) => {
-                self.editing_index = self.editing_index.saturating_sub(1);
-                EventResponse::UpdateUI
-            }
-            (KeyCode::Home, KeyModifiers::NONE) | (KeyCode::Char('a'), KeyModifiers::CONTROL) => {
-                self.editing_index = 0;
-                EventResponse::UpdateUI
-            }
-            (KeyCode::End, KeyModifiers::NONE) | (KeyCode::Char('e'), KeyModifiers::CONTROL) => {
-                self.editing_index = self.editing_text.len();
-                EventResponse::UpdateUI
-            }
-            (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
-                self.clear_editing_text();
-                EventResponse::UpdateUI
-            }
-            (KeyCode::Enter, KeyModifiers::NONE) => {
-                self.create_item_from_editing_text();
-                EventResponse::UpdateUI
-            }
-            (KeyCode::Esc, KeyModifiers::NONE) => {
-                self.exit_editing_mode();
-                EventResponse::UpdateUI
-            }
-            (KeyCode::Char('c'), KeyModifiers::CONTROL) => EventResponse::ExitProgram,
+    fn editing_mode_handle_event(&mut self, event: Event) -> EventResponse {
+        match event {
+            Event::Key(key) => match (key.code, key.modifiers) {
+                (KeyCode::Char(ch), KeyModifiers::NONE)
+                | (KeyCode::Char(ch), KeyModifiers::SHIFT) => {
+                    self.append_to_editing_text(ch);
+                    self.editing_index = self.editing_index.saturating_add(1);
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Backspace, KeyModifiers::NONE) => {
+                    self.delete_from_editing_text();
+                    self.editing_index = self.editing_index.saturating_sub(1);
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Right, KeyModifiers::NONE) => {
+                    self.editing_index = (self.editing_index + 1).min(self.editing_text.len());
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Left, KeyModifiers::NONE) => {
+                    self.editing_index = self.editing_index.saturating_sub(1);
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Home, KeyModifiers::NONE)
+                | (KeyCode::Char('a'), KeyModifiers::CONTROL) => {
+                    self.editing_index = 0;
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::End, KeyModifiers::NONE)
+                | (KeyCode::Char('e'), KeyModifiers::CONTROL) => {
+                    self.editing_index = self.editing_text.len();
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
+                    self.clear_editing_text();
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Enter, KeyModifiers::NONE) => {
+                    self.create_item_from_editing_text();
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Esc, KeyModifiers::NONE) => {
+                    self.exit_editing_mode();
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Char('c'), KeyModifiers::CONTROL) => EventResponse::ExitProgram,
+                _ => EventResponse::NoAction,
+            },
+
+            // ignore other event types
             _ => EventResponse::NoAction,
         }
     }
