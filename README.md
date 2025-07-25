@@ -8,7 +8,7 @@ Additionally, this crate is a test for AI coding using [Aider](https://aider.cha
 
 ## Status
 
-This is currently **pre-alpha** phase software. It is very feature incomplete compared to [Skim](https://lib.rs/crates/skim), [fzf](https://github.com/junegunn/fzf), and other fuzzy finders.
+This is currently **alpha** phase software. It is feature incomplete compared to [Skim](https://lib.rs/crates/skim), [fzf](https://github.com/junegunn/fzf), and other fuzzy finders, though it does handle some basic tasks.
 
 The current development focus is on integrating this into a larger project as a selector widget. As such, it's unlikely to gain feature parity with other CLI fuzzy finders in the near future.
 
@@ -20,7 +20,7 @@ This is a mix of feature list and roadmap. Checked features are present in the c
 - [x] Can handle input on `stdin`
 - [x] List directory contents, with recursive option
 - [x] List file contents
-- [ ] Preview command functionality
+- [x] Preview command functionality
 - [ ] Running commands on selected entries
 - [ ] Support config via args and file
 - [ ] Builder pattern for config when used as a library
@@ -39,7 +39,7 @@ This is a mix of feature list and roadmap. Checked features are present in the c
 - [x] Middle-click to toggle item selection
 - [x] Click on items to toggle item selection
 
-Due to the excellent design of [nucleo](https://docs.rs/nucleo/0.5.0/nucleo/) we are able to load matches in separate threads while the user starts searching. Currently, the `--threaded` option controls whether we perform item loads in separate threads. Only one thread is used to load arguments from `STDIN` while one thread per arg is used when passing file path arguments.
+Due to the excellent design of [nucleo](https://docs.rs/nucleo/latest/nucleo/) we are able to load matches in separate threads while the user starts searching. Currently, the `--threaded` option controls whether we perform item loads in separate threads. Only one thread is used to load arguments from `STDIN` while one thread per arg is used when passing file path arguments.
 
 ## Usage
 
