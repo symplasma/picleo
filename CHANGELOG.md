@@ -5,7 +5,86 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.7 (2025-07-25)
+
+### Chore
+
+ - <csr-id-e78c4e14ef26ecbda9737fdfadc5fe86fa309e2c/> Remove unecessary use
+
+### Documentation
+
+ - <csr-id-0cf9ca1e9ad09a21d66d323f201799ba918425c3/> Update status, features, and link
+ - <csr-id-7845f3ca9a4d306e5c3542634fc4dc212ec35e0d/> Add preview command design
+ - <csr-id-df095d4f9a46a62921b3118bbc27ad2ad4ace525/> Update readme
+
+### New Features
+
+ - <csr-id-f9ced82a2c271b578fc518c3ba1f80de806cec03/> Sanitize preview command output
+ - <csr-id-76abdf6c33f7c371b2f62fece080193e8afc55ba/> Add shell escaping to preview command placeholders
+ - <csr-id-2b183d4a2b2a2ac9f531af6c691b66af4201b69e/> add preview command support with placeholders
+ - <csr-id-50a2aba713ac9409a71439a23607aab758c4f922/> support file and directory input with dynamic picker type
+
+### Bug Fixes
+
+ - <csr-id-60b087c4c8016a42fcd102879b86562f46e30ad8/> resolve shell command execution and import order
+ - <csr-id-7181e10c782e1461bc8b996450a5632b2cb0cf67/> change shell from sh to zsh for command execution
+
+### Refactor
+
+ - <csr-id-548afc8272921ffdac2e7d52878986f0a8893efa/> Better handling of command args
+ - <csr-id-62225ec1c8f1941e396542f4560f7dfaa2d863eb/> Finish moving methods and structs
+   Moving the code around as the main file was getting way too long and it was getting hard to find things in the mess. Also, AI tends to mirror the structure of the existing code. We don't need it to make more mess.
+ - <csr-id-1990e8748c072c9f0739be02d491cda81e1eed0a/> Split Search and Editing modes
+ - <csr-id-2a793aa894c159b235987f8f685cf75f8c678c5e/> Event dispatch cleanup
+ - <csr-id-764a55e3b3b7a8e06d56d1622683df26430308d3/> Improve redraw and preview logic
+ - <csr-id-04e5b3b72faf6756383cd82a2b1b9ae79198a397/> Clean up conditions
+ - <csr-id-d480ed53dee5989bcf516b268bcdb5745d831492/> execute preview command directly without shell
+ - <csr-id-f6a2edb3acedf03609cc8d8c52600d1a3322370d/> Refactoring main to simplify code
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 19 commits contributed to the release over the course of 16 calendar days.
+ - 17 days passed between releases.
+ - 18 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Update status, features, and link ([`0cf9ca1`](https://github.com/symplasma/picleo/commit/0cf9ca1e9ad09a21d66d323f201799ba918425c3))
+    - Sanitize preview command output ([`f9ced82`](https://github.com/symplasma/picleo/commit/f9ced82a2c271b578fc518c3ba1f80de806cec03))
+    - Better handling of command args ([`548afc8`](https://github.com/symplasma/picleo/commit/548afc8272921ffdac2e7d52878986f0a8893efa))
+    - Finish moving methods and structs ([`62225ec`](https://github.com/symplasma/picleo/commit/62225ec1c8f1941e396542f4560f7dfaa2d863eb))
+    - Split Search and Editing modes ([`1990e87`](https://github.com/symplasma/picleo/commit/1990e8748c072c9f0739be02d491cda81e1eed0a))
+    - Event dispatch cleanup ([`2a793aa`](https://github.com/symplasma/picleo/commit/2a793aa894c159b235987f8f685cf75f8c678c5e))
+    - Add todo comments ([`35b44ce`](https://github.com/symplasma/picleo/commit/35b44ce6e0c2358c94542023638ba96e115df6e7))
+    - Improve redraw and preview logic ([`764a55e`](https://github.com/symplasma/picleo/commit/764a55e3b3b7a8e06d56d1622683df26430308d3))
+    - Clean up conditions ([`04e5b3b`](https://github.com/symplasma/picleo/commit/04e5b3b72faf6756383cd82a2b1b9ae79198a397))
+    - Execute preview command directly without shell ([`d480ed5`](https://github.com/symplasma/picleo/commit/d480ed53dee5989bcf516b268bcdb5745d831492))
+    - Resolve shell command execution and import order ([`60b087c`](https://github.com/symplasma/picleo/commit/60b087c4c8016a42fcd102879b86562f46e30ad8))
+    - Add shell escaping to preview command placeholders ([`76abdf6`](https://github.com/symplasma/picleo/commit/76abdf6c33f7c371b2f62fece080193e8afc55ba))
+    - Change shell from sh to zsh for command execution ([`7181e10`](https://github.com/symplasma/picleo/commit/7181e10c782e1461bc8b996450a5632b2cb0cf67))
+    - Add preview command support with placeholders ([`2b183d4`](https://github.com/symplasma/picleo/commit/2b183d4a2b2a2ac9f531af6c691b66af4201b69e))
+    - Add preview command design ([`7845f3c`](https://github.com/symplasma/picleo/commit/7845f3ca9a4d306e5c3542634fc4dc212ec35e0d))
+    - Update readme ([`df095d4`](https://github.com/symplasma/picleo/commit/df095d4f9a46a62921b3118bbc27ad2ad4ace525))
+    - Refactoring main to simplify code ([`f6a2edb`](https://github.com/symplasma/picleo/commit/f6a2edb3acedf03609cc8d8c52600d1a3322370d))
+    - Remove unecessary use ([`e78c4e1`](https://github.com/symplasma/picleo/commit/e78c4e14ef26ecbda9737fdfadc5fe86fa309e2c))
+    - Support file and directory input with dynamic picker type ([`50a2aba`](https://github.com/symplasma/picleo/commit/50a2aba713ac9409a71439a23607aab758c4f922))
+</details>
+
 ## v0.1.6 (2025-07-07)
+
+<csr-id-b4f914493a3830d121464de08a53fd99b561dfa5/>
+<csr-id-7b9b90c3134c401e132c224c4f160b9c8754ae7d/>
+<csr-id-a9147753f1fc154543bec97216477eafc114670b/>
+<csr-id-0f3366ac433473a8931802b02f6060d54cd3b9f4/>
+<csr-id-eb2e9067ff49462afb06b07ee876e18035998f49/>
 
 ### Chore
 
@@ -43,7 +122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 13 commits contributed to the release.
+ - 14 commits contributed to the release.
  - 13 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -54,6 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release picleo v0.1.6 ([`8bc912e`](https://github.com/symplasma/picleo/commit/8bc912ecb88d1c90b4b0e700c5a8ab4e048dce64))
     - Update README ([`a6b4765`](https://github.com/symplasma/picleo/commit/a6b4765cde5340a53133b2b7f8d9ff336d682990))
     - Add item editing and creation ([`db68bbf`](https://github.com/symplasma/picleo/commit/db68bbf9456837c6df42d96a518c8eb213192d6d))
     - Make new items selected by default ([`b4f9144`](https://github.com/symplasma/picleo/commit/b4f914493a3830d121464de08a53fd99b561dfa5))
