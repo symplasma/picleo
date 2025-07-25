@@ -41,6 +41,7 @@ where
     pub config: Config,
     pub preview_command: Option<String>,
     pub preview_output: String,
+    pub keep_colors: bool,
 }
 
 impl<T: Sync + Send + Display> Default for Picker<T> {
@@ -72,6 +73,7 @@ where
             config,
             preview_command,
             preview_output: String::new(),
+            keep_colors: false,
         }
     }
 

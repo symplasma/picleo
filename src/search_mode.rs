@@ -594,6 +594,10 @@ where
         self.preview_command = Some(command);
     }
 
+    pub fn set_keep_colors(&mut self, keep_colors: bool) {
+        self.keep_colors = keep_colors;
+    }
+
     pub fn has_preview(&self) -> bool {
         self.preview_command.is_some()
     }
@@ -671,9 +675,9 @@ where
                                 preview_bytes.extend_from_slice(&output.stderr);
                             }
 
-                            // clean ANSI escapes via the `eunicode` crate, but keep colors
+                            // clean ANSI escapes via the `eunicode` crate, optionally keep colors
                             let raw_bytes =
-                                RawBytes::from_bytes(preview_bytes).strip_ansi_escapes(true);
+                                RawBytes::from_bytes(preview_bytes).strip_ansi_escapes(self.keep_colors);
                             // clean sketchy unicode codepoints
                             self.preview_output =
                                 UnicodeString::new(raw_bytes).clean().into_string();
