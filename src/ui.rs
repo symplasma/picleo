@@ -1,8 +1,9 @@
 use crate::picker::Picker;
+use ansi_to_tui::IntoText;
 use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
-    text::{Line, Span},
+    text::{Line, Span, Text},
     widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame,
 };
@@ -218,11 +219,11 @@ fn render_preview<T>(f: &mut Frame, app: &Picker<T>, area: Rect)
 where
     T: Sync + Send + Display,
 {
-    let preview_text = app.preview_output();
-    let lines: Vec<Line> = preview_text
-        .lines()
-        .map(|line| Line::from(line.to_string()))
-        .collect();
+    // using the `ansi-to-tui` crate to allow correct rendering of colored text
+    let lines = match app.preview_output().into_text() {
+        Ok(text) => text,
+        Err(e) => Text::from(format!("Could not render preview: {e}")),
+    };
 
     let preview = Paragraph::new(lines)
         .block(Block::default().borders(Borders::ALL).title("Preview"))

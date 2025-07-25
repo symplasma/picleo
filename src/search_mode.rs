@@ -5,6 +5,7 @@ use crate::{
 };
 use comma::parse_command;
 use crossterm::event::{Event, KeyCode, KeyModifiers, MouseButton, MouseEventKind};
+use eunicode::{raw_bytes::RawBytes, unicode_string::UnicodeString};
 use nucleo::pattern::{CaseMatching, Normalization};
 use std::{fmt::Display, ops::RangeInclusive, process::Command};
 
@@ -658,17 +659,24 @@ where
                             //      handle odd bytes
                             //      remove ansi codes except colors
                             //      clean unicode?
-                            self.preview_output =
-                                String::from_utf8_lossy(&output.stdout).to_string();
+
+                            let mut preview_bytes: Vec<u8> = output.stdout;
 
                             // handle output on STDERR
                             if !output.stderr.is_empty() {
-                                let stderr = String::from_utf8_lossy(&output.stderr);
-                                if !self.preview_output.is_empty() {
-                                    self.preview_output.push_str("\n--- stderr ---\n");
+                                if !preview_bytes.is_empty() {
+                                    preview_bytes
+                                        .extend_from_slice("\n--- stderr ---\n".as_bytes());
                                 }
-                                self.preview_output.push_str(&stderr);
+                                preview_bytes.extend_from_slice(&output.stderr);
                             }
+
+                            // clean ANSI escapes via the `eunicode` crate, but keep colors
+                            let raw_bytes =
+                                RawBytes::from_bytes(preview_bytes).strip_ansi_escapes(true);
+                            // clean sketchy unicode codepoints
+                            self.preview_output =
+                                UnicodeString::new(raw_bytes).clean().into_string();
                             return;
                         }
                         Err(e) => {
