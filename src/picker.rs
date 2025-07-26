@@ -42,11 +42,12 @@ where
     pub preview_command: Option<String>,
     pub preview_output: String,
     pub keep_colors: bool,
+    pub editable: bool,
 }
 
 impl<T: Sync + Send + Display> Default for Picker<T> {
     fn default() -> Self {
-        Self::new()
+        Self::new(true)
     }
 }
 
@@ -55,7 +56,7 @@ impl<T> Picker<T>
 where
     T: Sync + Send + Display,
 {
-    pub fn new() -> Self {
+    pub fn new(editable: bool) -> Self {
         let config = Config::load().unwrap_or_default();
         let matcher = Nucleo::new(NucleoConfig::DEFAULT, Arc::new(|| {}), None, 1);
         let preview_command = config.preview_command().cloned();
@@ -74,6 +75,7 @@ where
             preview_command,
             preview_output: String::new(),
             keep_colors: false,
+            editable,
         }
     }
 

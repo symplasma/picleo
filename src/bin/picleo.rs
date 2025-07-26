@@ -79,7 +79,7 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
     // Check if we have any files vs directories to determine picker type
     if has_files && !has_dirs {
         // Only files - use String picker for file contents
-        let mut picker = Picker::<String>::new();
+        let mut picker = Picker::<String>::new(true);
         picker.set_keep_colors(args.keep_colors);
         if let Some(preview_cmd) = preview_command.clone() {
             picker.set_preview_command(preview_cmd);
@@ -116,7 +116,7 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
         }
     } else {
         // Has directories or mixed - use DisplayPath picker for file paths
-        let mut picker = Picker::<DisplayPath>::new();
+        let mut picker = Picker::<DisplayPath>::new(true);
         picker.set_keep_colors(args.keep_colors);
         if let Some(preview_cmd) = preview_command {
             picker.set_preview_command(preview_cmd);
@@ -185,7 +185,7 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
 }
 
 fn load_from_stdin(args: Args) -> Result<(), anyhow::Error> {
-    let mut picker = Picker::<String>::new();
+    let mut picker = Picker::<String>::new(true);
     picker.set_keep_colors(args.keep_colors);
     if let Some(preview_cmd) = args.preview {
         picker.set_preview_command(preview_cmd);

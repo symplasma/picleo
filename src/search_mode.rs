@@ -107,10 +107,18 @@ where
                         self.next();
                     }
                     (KeyCode::Char('d'), KeyModifiers::CONTROL) => {
-                        self.enter_editing_mode(self.current_item_text());
+                        if self.editable {
+                            self.enter_editing_mode(self.current_item_text());
+                        } else {
+                            event_response = EventResponse::NoAction;
+                        }
                     }
                     (KeyCode::Char('n'), KeyModifiers::CONTROL) => {
-                        self.enter_editing_mode(String::new());
+                        if self.editable {
+                            self.enter_editing_mode(String::new());
+                        } else {
+                            event_response = EventResponse::NoAction;
+                        }
                     }
 
                     // ignore other key codes
