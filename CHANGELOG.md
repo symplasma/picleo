@@ -5,7 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.8 (2025-07-26)
+
+### Documentation
+
+ - <csr-id-7914b0c8069095e5c1aa08ced2fec0c4ba2beb99/> Add TODO and autocomplete
+
+### New Features
+
+ - <csr-id-843d3a855031648dce27dea1771ad75e1cadf2a8/> add `editable` flag to control edit mode in Picker
+ - <csr-id-22c452214e3b16c644e6212aa5113231b2489819/> add `--keep-colors` CLI flag to control ANSI color rendering in preview
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 3 commits contributed to the release.
+ - 1 day passed between releases.
+ - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Add `editable` flag to control edit mode in Picker ([`843d3a8`](https://github.com/symplasma/picleo/commit/843d3a855031648dce27dea1771ad75e1cadf2a8))
+    - Add `--keep-colors` CLI flag to control ANSI color rendering in preview ([`22c4522`](https://github.com/symplasma/picleo/commit/22c452214e3b16c644e6212aa5113231b2489819))
+    - Add TODO and autocomplete ([`7914b0c`](https://github.com/symplasma/picleo/commit/7914b0c8069095e5c1aa08ced2fec0c4ba2beb99))
+</details>
+
 ## v0.1.7 (2025-07-25)
+
+<csr-id-e78c4e14ef26ecbda9737fdfadc5fe86fa309e2c/>
+<csr-id-548afc8272921ffdac2e7d52878986f0a8893efa/>
+<csr-id-62225ec1c8f1941e396542f4560f7dfaa2d863eb/>
+<csr-id-1990e8748c072c9f0739be02d491cda81e1eed0a/>
+<csr-id-2a793aa894c159b235987f8f685cf75f8c678c5e/>
+<csr-id-764a55e3b3b7a8e06d56d1622683df26430308d3/>
+<csr-id-04e5b3b72faf6756383cd82a2b1b9ae79198a397/>
+<csr-id-d480ed53dee5989bcf516b268bcdb5745d831492/>
+<csr-id-f6a2edb3acedf03609cc8d8c52600d1a3322370d/>
 
 ### Chore
 
@@ -45,7 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 19 commits contributed to the release over the course of 16 calendar days.
+ - 20 commits contributed to the release over the course of 16 calendar days.
  - 17 days passed between releases.
  - 18 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
@@ -57,6 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release picleo v0.1.7 ([`0ea571d`](https://github.com/symplasma/picleo/commit/0ea571d860da9a60e849cf3055ad52509c83876e))
     - Update status, features, and link ([`0cf9ca1`](https://github.com/symplasma/picleo/commit/0cf9ca1e9ad09a21d66d323f201799ba918425c3))
     - Sanitize preview command output ([`f9ced82`](https://github.com/symplasma/picleo/commit/f9ced82a2c271b578fc518c3ba1f80de806cec03))
     - Better handling of command args ([`548afc8`](https://github.com/symplasma/picleo/commit/548afc8272921ffdac2e7d52878986f0a8893efa))
