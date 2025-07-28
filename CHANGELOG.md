@@ -5,7 +5,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.10 (2025-07-28)
+
+### Documentation
+
+ - <csr-id-defed26bf158033b160591ce0957740ad8896acd/> Update todo document
+
+### New Features
+
+ - <csr-id-9d34395c982f23d56ea5c9a80721bc08fd890a47/> Improve interframe delay handling
+ - <csr-id-464d8ef7ad93e091defb7f7e1576ea13c6a9c59f/> improve help screen scrolling on terminal resize
+ - <csr-id-a1fb9e4914c9f4a425b8b5429bc067a0fd6bbd52/> add window resize event handling to trigger UI refresh
+ - <csr-id-f47b315e70e12684151f8091584b09344f848b1a/> add scrollable help screen with multiple navigation methods
+ - <csr-id-e3b90e712ebd0313736ceac1a9f480770c8edc51/> add help command with Ctrl+h in search and editing modes
+
+### Bug Fixes
+
+ - <csr-id-1df91a06214197bc03187d276107592b9cc4b647/> Format code
+ - <csr-id-9afca7030bb9773c561efe783bfc7e5cf2abe5c5/> Complete match statements
+ - <csr-id-3df4be384b3cd9f1b6f8100af229aad535c940ea/> Remove unnecessary todo macros
+
+### Refactor
+
+ - <csr-id-31255c613fc78d140c76bf32f1cc0b73d0e4c93f/> constrain help scrolling to prevent blank screen and ensure content visibility
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 10 commits contributed to the release.
+ - 10 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Improve interframe delay handling ([`9d34395`](https://github.com/symplasma/picleo/commit/9d34395c982f23d56ea5c9a80721bc08fd890a47))
+    - Format code ([`1df91a0`](https://github.com/symplasma/picleo/commit/1df91a06214197bc03187d276107592b9cc4b647))
+    - Improve help screen scrolling on terminal resize ([`464d8ef`](https://github.com/symplasma/picleo/commit/464d8ef7ad93e091defb7f7e1576ea13c6a9c59f))
+    - Add window resize event handling to trigger UI refresh ([`a1fb9e4`](https://github.com/symplasma/picleo/commit/a1fb9e4914c9f4a425b8b5429bc067a0fd6bbd52))
+    - Constrain help scrolling to prevent blank screen and ensure content visibility ([`31255c6`](https://github.com/symplasma/picleo/commit/31255c613fc78d140c76bf32f1cc0b73d0e4c93f))
+    - Add scrollable help screen with multiple navigation methods ([`f47b315`](https://github.com/symplasma/picleo/commit/f47b315e70e12684151f8091584b09344f848b1a))
+    - Complete match statements ([`9afca70`](https://github.com/symplasma/picleo/commit/9afca7030bb9773c561efe783bfc7e5cf2abe5c5))
+    - Add help command with Ctrl+h in search and editing modes ([`e3b90e7`](https://github.com/symplasma/picleo/commit/e3b90e712ebd0313736ceac1a9f480770c8edc51))
+    - Remove unnecessary todo macros ([`3df4be3`](https://github.com/symplasma/picleo/commit/3df4be384b3cd9f1b6f8100af229aad535c940ea))
+    - Update todo document ([`defed26`](https://github.com/symplasma/picleo/commit/defed26bf158033b160591ce0957740ad8896acd))
+</details>
+
 ## v0.1.9 (2025-07-28)
+
+<csr-id-4dbec3d06e22990cc79c5e4906ac7d79306795fc/>
 
 ### Chore
 
@@ -32,7 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 14 commits contributed to the release.
+ - 15 commits contributed to the release.
  - 2 days passed between releases.
  - 12 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
@@ -44,6 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release picleo v0.1.9 ([`b5cddf4`](https://github.com/symplasma/picleo/commit/b5cddf41ebbb41170613bbbb535026f868456f16))
     - Clean up selection logic ([`f68c68b`](https://github.com/symplasma/picleo/commit/f68c68be7a4f1ccc9a83ad65633e0c8ddc310404))
     - Apply search mode selection styling to autocomplete suggestions ([`5161702`](https://github.com/symplasma/picleo/commit/5161702cbd8b9a699e0c1ea9babda21033f22986))
     - Implement tab selection and multi-item entry in editing mode ([`6b659ef`](https://github.com/symplasma/picleo/commit/6b659efd1db5c637764c9186ce50793bc1a3dbd6))
