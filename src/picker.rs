@@ -197,6 +197,20 @@ where
         }
     }
 
+    fn handle_resize_event(&mut self) {
+        // If we're in help mode and the window is now large enough to show all content,
+        // scroll back to the top
+        if self.mode == PickerMode::Help {
+            let max_offset = self.max_help_scroll_offset();
+            if max_offset == 0 && self.help_scroll_offset > 0 {
+                self.help_scroll_offset = 0;
+            } else if self.help_scroll_offset > max_offset {
+                // Constrain scroll offset if it's now beyond the maximum
+                self.help_scroll_offset = max_offset;
+            }
+        }
+    }
+
     pub(crate) fn help_mode_handle_event(&mut self, event: Event) -> EventResponse {
         match event {
             Event::Key(key) => match key.code {
@@ -324,6 +338,7 @@ where
                 
                 // Handle resize events separately to always trigger a redraw
                 if let Event::Resize(_, _) = event {
+                    self.handle_resize_event();
                     redraw_requested = true;
                 } else {
                     match self.handle_event_by_mode(event) {
