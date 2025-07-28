@@ -1,4 +1,5 @@
 
+use std::ops::Index;
 use crate::selectable::SelectableItem;
 
 /// A collection of requested items that acts as a wrapper around a Vec<SelectableItem<T>>
@@ -88,5 +89,13 @@ impl<'a, T> IntoIterator for &'a mut RequestedItems<T> {
 
     fn into_iter(self) -> Self::IntoIter {
         self.items.iter_mut()
+    }
+}
+
+impl<T> Index<usize> for RequestedItems<T> {
+    type Output = SelectableItem<T>;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.items[index]
     }
 }
