@@ -184,10 +184,10 @@ where
     fn max_help_scroll_offset(&self) -> u16 {
         // Help content has approximately 38 lines (counted from render_help_screen)
         const HELP_CONTENT_LINES: u16 = 38;
-        
+
         // Account for borders (2 lines) in the help screen
         let available_height = self.height.saturating_sub(2);
-        
+
         // Ensure we can't scroll so far that the screen becomes blank
         // Keep at least one screenful visible
         if HELP_CONTENT_LINES > available_height {
@@ -236,7 +236,8 @@ where
                 }
                 KeyCode::Down | KeyCode::Char('j') => {
                     let max_offset = self.max_help_scroll_offset();
-                    self.help_scroll_offset = (self.help_scroll_offset.saturating_add(1)).min(max_offset);
+                    self.help_scroll_offset =
+                        (self.help_scroll_offset.saturating_add(1)).min(max_offset);
                     EventResponse::UpdateUI
                 }
                 KeyCode::PageUp => {
@@ -245,7 +246,8 @@ where
                 }
                 KeyCode::PageDown => {
                     let max_offset = self.max_help_scroll_offset();
-                    self.help_scroll_offset = (self.help_scroll_offset.saturating_add(10)).min(max_offset);
+                    self.help_scroll_offset =
+                        (self.help_scroll_offset.saturating_add(10)).min(max_offset);
                     EventResponse::UpdateUI
                 }
                 KeyCode::Home => {
@@ -265,7 +267,8 @@ where
                 }
                 crossterm::event::MouseEventKind::ScrollDown => {
                     let max_offset = self.max_help_scroll_offset();
-                    self.help_scroll_offset = (self.help_scroll_offset.saturating_add(3)).min(max_offset);
+                    self.help_scroll_offset =
+                        (self.help_scroll_offset.saturating_add(3)).min(max_offset);
                     EventResponse::UpdateUI
                 }
                 _ => EventResponse::NoAction,
@@ -335,7 +338,7 @@ where
             if event::poll(Duration::from_millis(16))? {
                 // read the event that is ready (normally read blocks, but we're polling until it's ready)
                 let event = event::read()?;
-                
+
                 // Handle resize events separately to always trigger a redraw
                 if let Event::Resize(_, _) = event {
                     self.handle_resize_event();

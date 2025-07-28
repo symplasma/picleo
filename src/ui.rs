@@ -380,7 +380,11 @@ fn render_help_screen(f: &mut Frame, area: Rect, scroll_offset: u16) {
     ];
 
     let help_paragraph = Paragraph::new(help_text)
-        .block(Block::default().borders(Borders::ALL).title("Help - Use ↑/↓ or j/k to scroll"))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title("Help - Use ↑/↓ or j/k to scroll"),
+        )
         .alignment(Alignment::Left)
         .wrap(ratatui::widgets::Wrap { trim: false })
         .scroll((scroll_offset, 0));
