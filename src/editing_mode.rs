@@ -26,12 +26,35 @@ where
                     self.update_autocomplete_suggestions();
                     EventResponse::UpdateUI
                 }
+                (KeyCode::Backspace, KeyModifiers::SHIFT) => {
+                    self.delete_word_backward_editing();
+                    self.update_autocomplete_suggestions();
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Delete, KeyModifiers::NONE) => {
+                    self.delete_forward_editing();
+                    self.update_autocomplete_suggestions();
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Delete, KeyModifiers::SHIFT) => {
+                    self.delete_word_forward_editing();
+                    self.update_autocomplete_suggestions();
+                    EventResponse::UpdateUI
+                }
                 (KeyCode::Right, KeyModifiers::NONE) => {
                     self.editing_index = (self.editing_index + 1).min(self.editing_text.len());
                     EventResponse::UpdateUI
                 }
+                (KeyCode::Right, KeyModifiers::SHIFT) => {
+                    self.jump_word_forward_editing();
+                    EventResponse::UpdateUI
+                }
                 (KeyCode::Left, KeyModifiers::NONE) => {
                     self.editing_index = self.editing_index.saturating_sub(1);
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Left, KeyModifiers::SHIFT) => {
+                    self.jump_word_backward_editing();
                     EventResponse::UpdateUI
                 }
                 (KeyCode::Home, KeyModifiers::NONE)
@@ -46,6 +69,11 @@ where
                 }
                 (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
                     self.clear_editing_text();
+                    self.update_autocomplete_suggestions();
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Char('k'), KeyModifiers::CONTROL) => {
+                    self.delete_to_end_of_line_editing();
                     self.update_autocomplete_suggestions();
                     EventResponse::UpdateUI
                 }
@@ -122,5 +150,121 @@ where
             });
         }
         self.exit_editing_mode();
+    }
+
+    pub(crate) fn delete_forward_editing(&mut self) {
+        if self.editing_index < self.editing_text.len() {
+            self.editing_text.remove(self.editing_index);
+        }
+    }
+
+    pub(crate) fn delete_to_end_of_line_editing(&mut self) {
+        self.editing_text.truncate(self.editing_index);
+    }
+
+    pub(crate) fn delete_word_backward_editing(&mut self) {
+        if self.editing_index == 0 {
+            return;
+        }
+
+        // Get the part of the text before the current position
+        let before_cursor = &self.editing_text[..self.editing_index];
+
+        // Find the previous word boundary
+        let chars: Vec<char> = before_cursor.chars().collect();
+        let mut new_index = self.editing_index;
+
+        // Skip any whitespace at the current position
+        while new_index > 0 && chars[new_index - 1].is_whitespace() {
+            new_index -= 1;
+        }
+
+        // Skip the current word (non-whitespace characters)
+        while new_index > 0 && !chars[new_index - 1].is_whitespace() {
+            new_index -= 1;
+        }
+
+        // Remove the characters from new_index to current position
+        self.editing_text.drain(new_index..self.editing_index);
+        self.editing_index = new_index;
+    }
+
+    pub(crate) fn delete_word_forward_editing(&mut self) {
+        let text_len = self.editing_text.len();
+        if self.editing_index >= text_len {
+            return;
+        }
+
+        // Start from current position
+        let remaining = &self.editing_text[self.editing_index..];
+
+        // Find the next word boundary
+        let chars: Vec<char> = remaining.chars().collect();
+        let mut end_index = 0;
+
+        // Skip any whitespace at the current position
+        while end_index < chars.len() && chars[end_index].is_whitespace() {
+            end_index += 1;
+        }
+
+        // Skip the current word (non-whitespace characters)
+        while end_index < chars.len() && !chars[end_index].is_whitespace() {
+            end_index += 1;
+        }
+
+        // Remove the characters from current position to end_index
+        let absolute_end_index = self.editing_index + end_index;
+        self.editing_text.drain(self.editing_index..absolute_end_index);
+    }
+
+    pub(crate) fn jump_word_forward_editing(&mut self) {
+        let text_len = self.editing_text.len();
+        if self.editing_index >= text_len {
+            return;
+        }
+
+        // Start from current position
+        let remaining = &self.editing_text[self.editing_index..];
+
+        // Find the next word boundary
+        let chars: Vec<char> = remaining.chars().collect();
+        let mut new_index = 0;
+
+        // Skip any whitespace at the current position
+        while new_index < chars.len() && chars[new_index].is_whitespace() {
+            new_index += 1;
+        }
+
+        // Skip the current word (non-whitespace characters)
+        while new_index < chars.len() && !chars[new_index].is_whitespace() {
+            new_index += 1;
+        }
+
+        self.editing_index = (self.editing_index + new_index).min(text_len);
+    }
+
+    pub(crate) fn jump_word_backward_editing(&mut self) {
+        if self.editing_index == 0 {
+            return;
+        }
+
+        // Get the part of the text before the current position
+        let before_cursor = &self.editing_text[..self.editing_index];
+
+        // Find the previous word boundary
+        let chars: Vec<char> = before_cursor.chars().collect();
+        let mut new_index = self.editing_index;
+
+        // Skip any whitespace at the current position
+        while new_index > 0 && chars[new_index - 1].is_whitespace() {
+            new_index -= 1;
+        }
+
+        // Skip the current word (non-whitespace characters)
+        while new_index > 0 && !chars[new_index - 1].is_whitespace() {
+            new_index -= 1;
+        }
+
+        self.editing_index = new_index;
     }
 }
