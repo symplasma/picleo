@@ -3,7 +3,7 @@ use crate::{
     selectable::SelectableItem,
 };
 use crossterm::event::{Event, KeyCode, KeyModifiers};
-use std::fmt::Display;
+use std::{char, fmt::Display};
 
 impl<T> Picker<T>
 where
@@ -26,7 +26,10 @@ where
                     self.update_autocomplete_suggestions();
                     EventResponse::UpdateUI
                 }
-                (KeyCode::Backspace, KeyModifiers::SHIFT) => {
+                // TODO try and find a way to actually detect this
+                //      though it may not be possible without having users modify their terminal emulator config
+                (KeyCode::Backspace, KeyModifiers::CONTROL)
+                | (KeyCode::Backspace, KeyModifiers::SHIFT) => {
                     self.delete_word_backward_editing();
                     self.update_autocomplete_suggestions();
                     EventResponse::UpdateUI
@@ -36,7 +39,8 @@ where
                     self.update_autocomplete_suggestions();
                     EventResponse::UpdateUI
                 }
-                (KeyCode::Delete, KeyModifiers::SHIFT) => {
+                (KeyCode::Delete, KeyModifiers::CONTROL)
+                | (KeyCode::Delete, KeyModifiers::SHIFT) => {
                     self.delete_word_forward_editing();
                     self.update_autocomplete_suggestions();
                     EventResponse::UpdateUI
@@ -45,7 +49,7 @@ where
                     self.editing_index = (self.editing_index + 1).min(self.editing_text.len());
                     EventResponse::UpdateUI
                 }
-                (KeyCode::Right, KeyModifiers::SHIFT) => {
+                (KeyCode::Right, KeyModifiers::CONTROL) | (KeyCode::Right, KeyModifiers::SHIFT) => {
                     self.jump_word_forward_editing();
                     EventResponse::UpdateUI
                 }
@@ -53,7 +57,7 @@ where
                     self.editing_index = self.editing_index.saturating_sub(1);
                     EventResponse::UpdateUI
                 }
-                (KeyCode::Left, KeyModifiers::SHIFT) => {
+                (KeyCode::Left, KeyModifiers::CONTROL) | (KeyCode::Left, KeyModifiers::SHIFT) => {
                     self.jump_word_backward_editing();
                     EventResponse::UpdateUI
                 }
@@ -175,12 +179,12 @@ where
         let mut new_index = self.editing_index;
 
         // Skip any whitespace at the current position
-        while new_index > 0 && chars[new_index - 1].is_whitespace() {
+        while new_index > 0 && is_skippable_char(&chars[new_index - 1]) {
             new_index -= 1;
         }
 
         // Skip the current word (non-whitespace characters)
-        while new_index > 0 && !chars[new_index - 1].is_whitespace() {
+        while new_index > 0 && !is_skippable_char(&chars[new_index - 1]) {
             new_index -= 1;
         }
 
@@ -203,18 +207,19 @@ where
         let mut end_index = 0;
 
         // Skip any whitespace at the current position
-        while end_index < chars.len() && chars[end_index].is_whitespace() {
+        while end_index < chars.len() && is_skippable_char(&chars[end_index]) {
             end_index += 1;
         }
 
         // Skip the current word (non-whitespace characters)
-        while end_index < chars.len() && !chars[end_index].is_whitespace() {
+        while end_index < chars.len() && !is_skippable_char(&chars[end_index]) {
             end_index += 1;
         }
 
         // Remove the characters from current position to end_index
         let absolute_end_index = self.editing_index + end_index;
-        self.editing_text.drain(self.editing_index..absolute_end_index);
+        self.editing_text
+            .drain(self.editing_index..absolute_end_index);
     }
 
     pub(crate) fn jump_word_forward_editing(&mut self) {
@@ -231,12 +236,12 @@ where
         let mut new_index = 0;
 
         // Skip any whitespace at the current position
-        while new_index < chars.len() && chars[new_index].is_whitespace() {
+        while new_index < chars.len() && is_skippable_char(&chars[new_index]) {
             new_index += 1;
         }
 
         // Skip the current word (non-whitespace characters)
-        while new_index < chars.len() && !chars[new_index].is_whitespace() {
+        while new_index < chars.len() && !is_skippable_char(&chars[new_index]) {
             new_index += 1;
         }
 
@@ -256,15 +261,19 @@ where
         let mut new_index = self.editing_index;
 
         // Skip any whitespace at the current position
-        while new_index > 0 && chars[new_index - 1].is_whitespace() {
+        while new_index > 0 && is_skippable_char(&chars[new_index - 1]) {
             new_index -= 1;
         }
 
         // Skip the current word (non-whitespace characters)
-        while new_index > 0 && !chars[new_index - 1].is_whitespace() {
+        while new_index > 0 && !is_skippable_char(&chars[new_index - 1]) {
             new_index -= 1;
         }
 
         self.editing_index = new_index;
     }
+}
+
+fn is_skippable_char(char: &char) -> bool {
+    char.is_whitespace() || *char == '/'
 }
