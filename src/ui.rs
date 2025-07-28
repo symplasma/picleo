@@ -15,7 +15,7 @@ where
 {
     match app.mode {
         crate::picker::PickerMode::Help => {
-            render_help_screen(f, f.area());
+            render_help_screen(f, f.area(), app.help_scroll_offset);
         }
         _ => {
             if app.has_preview() {
@@ -308,7 +308,7 @@ where
     f.render_widget(preview, area);
 }
 
-fn render_help_screen(f: &mut Frame, area: Rect) {
+fn render_help_screen(f: &mut Frame, area: Rect, scroll_offset: u16) {
     let help_text = vec![
         Line::from(vec![Span::styled(
             "Picleo Help",
@@ -380,9 +380,10 @@ fn render_help_screen(f: &mut Frame, area: Rect) {
     ];
 
     let help_paragraph = Paragraph::new(help_text)
-        .block(Block::default().borders(Borders::ALL).title("Help"))
+        .block(Block::default().borders(Borders::ALL).title("Help - Use ↑/↓ or j/k to scroll"))
         .alignment(Alignment::Left)
-        .wrap(ratatui::widgets::Wrap { trim: false });
+        .wrap(ratatui::widgets::Wrap { trim: false })
+        .scroll((scroll_offset, 0));
 
     f.render_widget(help_paragraph, area);
 }

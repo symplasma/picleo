@@ -48,6 +48,7 @@ where
     pub autocomplete: Option<Box<dyn Fn(&str) -> RequestedItems<String> + Send + Sync>>,
     pub autocomplete_suggestions: RequestedItems<String>,
     pub autocomplete_index: usize,
+    pub help_scroll_offset: u16,
 }
 
 impl<T: Sync + Send + Display> Default for Picker<T> {
@@ -84,6 +85,7 @@ where
             autocomplete: None,
             autocomplete_suggestions: RequestedItems::default(),
             autocomplete_index: 0,
+            help_scroll_offset: 0,
         }
     }
 
@@ -171,10 +173,12 @@ where
 
     pub(crate) fn enter_help_mode(&mut self) {
         self.mode = PickerMode::Help;
+        self.help_scroll_offset = 0;
     }
 
     pub(crate) fn exit_help_mode(&mut self) {
         self.mode = PickerMode::Search;
+        self.help_scroll_offset = 0;
     }
 
     pub(crate) fn help_mode_handle_event(&mut self, event: Event) -> EventResponse {
@@ -195,6 +199,42 @@ where
                 }
                 KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                     EventResponse::ExitProgram
+                }
+                KeyCode::Up | KeyCode::Char('k') => {
+                    self.help_scroll_offset = self.help_scroll_offset.saturating_sub(1);
+                    EventResponse::UpdateUI
+                }
+                KeyCode::Down | KeyCode::Char('j') => {
+                    self.help_scroll_offset = self.help_scroll_offset.saturating_add(1);
+                    EventResponse::UpdateUI
+                }
+                KeyCode::PageUp => {
+                    self.help_scroll_offset = self.help_scroll_offset.saturating_sub(10);
+                    EventResponse::UpdateUI
+                }
+                KeyCode::PageDown => {
+                    self.help_scroll_offset = self.help_scroll_offset.saturating_add(10);
+                    EventResponse::UpdateUI
+                }
+                KeyCode::Home => {
+                    self.help_scroll_offset = 0;
+                    EventResponse::UpdateUI
+                }
+                KeyCode::End => {
+                    // Set to a large value, the UI will constrain it appropriately
+                    self.help_scroll_offset = 1000;
+                    EventResponse::UpdateUI
+                }
+                _ => EventResponse::NoAction,
+            },
+            Event::Mouse(mouse) => match mouse.kind {
+                crossterm::event::MouseEventKind::ScrollUp => {
+                    self.help_scroll_offset = self.help_scroll_offset.saturating_sub(3);
+                    EventResponse::UpdateUI
+                }
+                crossterm::event::MouseEventKind::ScrollDown => {
+                    self.help_scroll_offset = self.help_scroll_offset.saturating_add(3);
+                    EventResponse::UpdateUI
                 }
                 _ => EventResponse::NoAction,
             },
