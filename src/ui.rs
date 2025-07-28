@@ -118,6 +118,7 @@ where
     let (text, cursor_index, title) = match app.mode {
         crate::picker::PickerMode::Search => (&app.query, app.query_index, "Search"),
         crate::picker::PickerMode::Editing => (&app.editing_text, app.editing_index, "Editing"),
+        crate::picker::PickerMode::Help => return,
     };
 
     // Split the text at the cursor position
@@ -228,6 +229,7 @@ where
                 f.render_widget(no_items_paragraph, chunks[1]);
             }
         }
+        crate::picker::PickerMode::Help => return,
     }
 }
 
