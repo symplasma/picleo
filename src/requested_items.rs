@@ -99,3 +99,9 @@ impl<T> Index<usize> for RequestedItems<T> {
         &self.items[index]
     }
 }
+
+impl<T> Extend<SelectableItem<T>> for RequestedItems<T> {
+    fn extend<I: IntoIterator<Item = SelectableItem<T>>>(&mut self, iter: I) {
+        self.items.extend(iter);
+    }
+}
