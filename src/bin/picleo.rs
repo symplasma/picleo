@@ -6,7 +6,7 @@ use picleo::{picker::Picker, selectable::SelectableItem};
 use std::{
     fmt, fs,
     io::{self, BufRead},
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 // Wrapper for PathBuf that implements Display
@@ -73,7 +73,7 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
     let has_dirs = args.dirs.iter().any(|path| path.is_dir());
 
     // these are here to prevent lifetime issues since args is a reference, error: borrowed data escapes outside of function
-    let dirs = args.dirs;
+    let dirs = args.dirs.clone();
     let preview_command = args.preview;
 
     // Check if we have any files vs directories to determine picker type
@@ -121,6 +121,67 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
         if let Some(preview_cmd) = preview_command {
             picker.set_preview_command(preview_cmd);
         }
+
+        // Collect directories to use for completion sources
+        let completion_dirs: Vec<PathBuf> = args
+            .dirs
+            .clone()
+            .into_iter()
+            .filter(|d| d.is_dir())
+            .collect();
+
+        // Setup the autocomplete function
+        picker.set_autocomplete(move |query| {
+            // Create the completion suggestions vec and add the default entry i.e. what the user typed at the default path
+            let mut suggestions = vec![match completion_dirs.first() {
+                Some(dir) => dir.join(query.to_string()).to_string_lossy().to_string(),
+                None => query.to_string(),
+            }];
+
+            // Split query as file path
+            let path_to_match = Path::new(query);
+            match (path_to_match.parent(), path_to_match.file_name()) {
+                // Perform completion with the given path and file name
+                (Some(parent), Some(file_name)) => {
+                    // Add completions for all provided directories
+                    for dir in &completion_dirs {
+                        // Check if the path, joined with the user provided text exists and is a directory
+                        let new_path = dir.join(parent);
+                        if new_path.exists() && new_path.is_dir() {
+                            // Read the directory entries
+                            if let Ok(files) = fs::read_dir(dir) {
+                                // Add completion suggestions
+                                suggestions.extend(files.filter_map(|entry| {
+                                    // Ignore errors in individual directory entries
+                                    entry.ok().and_then(|e| {
+                                        match e
+                                            .file_name()
+                                            .to_string_lossy()
+                                            .starts_with(&file_name.to_string_lossy().to_string())
+                                        {
+                                            // Add any directory entries that have a matching prefix
+                                            true => {
+                                                let mut parent_path = dir.clone();
+                                                parent_path.push(e.file_name());
+                                                Some(parent_path.to_string_lossy().to_string())
+                                            }
+                                            false => None,
+                                        }
+                                    })
+                                }));
+                            }
+                        }
+                    }
+                }
+
+                // TODO handle unimplemented cases
+                (None, None) => todo!(),
+                (None, Some(_)) => todo!(),
+                (Some(_), None) => todo!(),
+            }
+
+            suggestions
+        });
 
         for path in dirs {
             if path.is_file() {
