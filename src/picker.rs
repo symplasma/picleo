@@ -321,11 +321,17 @@ where
             if event::poll(Duration::from_millis(16))? {
                 // read the event that is ready (normally read blocks, but we're polling until it's ready)
                 let event = event::read()?;
-                match self.handle_event_by_mode(event) {
-                    EventResponse::NoAction => {}
-                    EventResponse::UpdateUI => redraw_requested = true,
-                    EventResponse::ExitProgram => return Ok(SelectedItems::from_refs(vec![])),
-                    EventResponse::ReturnSelectedItems => return Ok(self.selected_items()),
+                
+                // Handle resize events separately to always trigger a redraw
+                if let Event::Resize(_, _) = event {
+                    redraw_requested = true;
+                } else {
+                    match self.handle_event_by_mode(event) {
+                        EventResponse::NoAction => {}
+                        EventResponse::UpdateUI => redraw_requested = true,
+                        EventResponse::ExitProgram => return Ok(SelectedItems::from_refs(vec![])),
+                        EventResponse::ReturnSelectedItems => return Ok(self.selected_items()),
+                    }
                 }
             }
         }
