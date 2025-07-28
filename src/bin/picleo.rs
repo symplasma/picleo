@@ -2,7 +2,7 @@ extern crate picleo;
 
 use anyhow::Result;
 use clap::Parser;
-use picleo::{picker::Picker, selectable::SelectableItem};
+use picleo::{picker::Picker, requested_items::RequestedItems, selectable::SelectableItem};
 use std::{
     fmt, fs,
     io::{self, BufRead},
@@ -133,10 +133,12 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
         // Setup the autocomplete function
         picker.set_autocomplete(move |query| {
             // Create the completion suggestions vec and add the default entry i.e. what the user typed at the default path
-            let mut suggestions = vec![match completion_dirs.first() {
-                Some(dir) => dir.join(query.to_string()).to_string_lossy().to_string(),
-                None => query.to_string(),
-            }];
+            let mut suggestions = RequestedItems::from_vec(vec![match completion_dirs.first() {
+                Some(dir) => SelectableItem::new_requested(
+                    dir.join(query.to_string()).to_string_lossy().to_string(),
+                ),
+                None => SelectableItem::new_requested(query.to_string()),
+            }]);
 
             // Split query as file path
             let path_to_match = Path::new(query);

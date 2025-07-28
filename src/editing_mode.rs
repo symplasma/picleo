@@ -61,13 +61,18 @@ where
                 }
                 (KeyCode::Down, KeyModifiers::NONE) => {
                     if !self.autocomplete_suggestions.is_empty() {
-                        self.autocomplete_index = (self.autocomplete_index + 1).min(self.autocomplete_suggestions.len().saturating_sub(1));
+                        self.autocomplete_index = (self.autocomplete_index + 1)
+                            .min(self.autocomplete_suggestions.len().saturating_sub(1));
                     }
                     EventResponse::UpdateUI
                 }
                 (KeyCode::Tab, KeyModifiers::NONE) => {
-                    if !self.autocomplete_suggestions.is_empty() && self.autocomplete_index < self.autocomplete_suggestions.len() {
-                        self.editing_text = self.autocomplete_suggestions[self.autocomplete_index].clone();
+                    if !self.autocomplete_suggestions.is_empty()
+                        && self.autocomplete_index < self.autocomplete_suggestions.len()
+                    {
+                        self.editing_text = self.autocomplete_suggestions[self.autocomplete_index]
+                            .to_string()
+                            .clone();
                         self.editing_index = self.editing_text.len();
                         self.update_autocomplete_suggestions();
                     }

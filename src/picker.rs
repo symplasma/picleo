@@ -1,3 +1,4 @@
+use crate::requested_items::RequestedItems;
 use crate::{config::Config, selectable::SelectableItem, selected_items::SelectedItems, ui::ui};
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event},
@@ -43,8 +44,8 @@ where
     pub preview_output: String,
     pub keep_colors: bool,
     pub editable: bool,
-    pub autocomplete: Option<Box<dyn Fn(&str) -> Vec<String> + Send + Sync>>,
-    pub autocomplete_suggestions: Vec<String>,
+    pub autocomplete: Option<Box<dyn Fn(&str) -> RequestedItems<String> + Send + Sync>>,
+    pub autocomplete_suggestions: RequestedItems<String>,
     pub autocomplete_index: usize,
 }
 
@@ -80,7 +81,7 @@ where
             keep_colors: false,
             editable,
             autocomplete: None,
-            autocomplete_suggestions: Vec::new(),
+            autocomplete_suggestions: RequestedItems::default(),
             autocomplete_index: 0,
         }
     }
@@ -247,7 +248,7 @@ where
 
     pub fn set_autocomplete<F>(&mut self, autocomplete: F)
     where
-        F: Fn(&str) -> Vec<String> + Send + Sync + 'static,
+        F: Fn(&str) -> RequestedItems<String> + Send + Sync + 'static,
     {
         self.autocomplete = Some(Box::new(autocomplete));
     }

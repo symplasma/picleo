@@ -198,7 +198,8 @@ where
                     &mut ratatui::widgets::ListState::default().with_selected(Some(
                         app.current_index
                             // we need to correct the index here so that it's adjusted for the slice we're currently rendering
-                            .saturating_sub(app.first_visible_item_index()) as usize,
+                            .saturating_sub(app.first_visible_item_index())
+                            as usize,
                     )),
                 );
             } else {
@@ -215,7 +216,8 @@ where
                     )
                     .split(f.area());
 
-                let no_items_paragraph = Paragraph::new("No items found").alignment(Alignment::Center);
+                let no_items_paragraph =
+                    Paragraph::new("No items found").alignment(Alignment::Center);
                 f.render_widget(no_items_paragraph, chunks[1]);
             }
         }
@@ -230,9 +232,7 @@ where
         let items: Vec<ListItem> = app
             .autocomplete_suggestions
             .iter()
-            .map(|suggestion| {
-                ListItem::new(suggestion.as_str())
-            })
+            .map(|suggestion| ListItem::new(suggestion.to_string()))
             .collect();
 
         let items = List::new(items)
@@ -262,7 +262,8 @@ where
             )
             .split(f.area());
 
-        let no_suggestions_paragraph = Paragraph::new("No autocomplete suggestions").alignment(Alignment::Center);
+        let no_suggestions_paragraph =
+            Paragraph::new("No autocomplete suggestions").alignment(Alignment::Center);
         f.render_widget(no_suggestions_paragraph, chunks[1]);
     }
 }
