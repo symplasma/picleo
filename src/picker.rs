@@ -7,9 +7,14 @@ use crossterm::{
 };
 use nucleo::{Config as NucleoConfig, Injector, Nucleo, Snapshot};
 use ratatui::{prelude::CrosstermBackend, Terminal};
+use std::time::Instant;
 use std::{error, fmt::Display, io, sync::Arc, thread::JoinHandle, time::Duration};
 
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
+
+// This is the number of milliseconds between frames, target 60 fps, 1000 / 60 = 16ms (positive integer division floors the result)
+// Yes, u64 is overkill, but it's what Duration::from_millis() wants
+const FRAME_DELAY: u64 = 1000 / 60;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum PickerMode {
@@ -309,6 +314,9 @@ where
 
         // enter the actual event loop
         loop {
+            // Time when we started drawing this frame
+            let frame_draw_start = Instant::now();
+
             // draw the UI before any timeouts so it appears to the user immediately
             // redraw the UI if any of the below are true
             //   1. a redraw is requested by an event
@@ -322,7 +330,7 @@ where
             redraw_requested = false;
 
             // we must call this to keep Nucleo up to date
-            let status = self.tick(10);
+            let status = self.tick(FRAME_DELAY);
             // NOTE: do NOT try to move this logic into the event logic, there are non-event changes that need to trigger redraws
             if status.changed || status.running {
                 // TODO need to debounce events here
@@ -334,8 +342,17 @@ where
                 redraw_requested = true;
             }
 
+            // check how long it took us for the tick command to complete and render the preview
+            let frame_draw_duration = frame_draw_start.elapsed().as_millis() as u64;
+            // clamp the value between 1ms and FRAME_DELAY, setting the poll timeout to the remainder of the total delay
+            let event_poll_timeout = Duration::from_millis(
+                FRAME_DELAY
+                    .saturating_sub(frame_draw_duration)
+                    .clamp(1, FRAME_DELAY),
+            );
+
             // ensure that we update the UI, even when we aren't receiving events from the user
-            if event::poll(Duration::from_millis(16))? {
+            if event::poll(event_poll_timeout)? {
                 // read the event that is ready (normally read blocks, but we're polling until it's ready)
                 let event = event::read()?;
 
