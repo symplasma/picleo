@@ -1,7 +1,7 @@
 use crate::requested_items::RequestedItems;
 use crate::{config::Config, selectable::SelectableItem, selected_items::SelectedItems, ui::ui};
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event},
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -15,6 +15,7 @@ pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 pub enum PickerMode {
     Search,
     Editing,
+    Help,
 }
 
 pub(crate) enum EventResponse {
@@ -168,6 +169,39 @@ where
         self.autocomplete_index = 0;
     }
 
+    pub(crate) fn enter_help_mode(&mut self) {
+        self.mode = PickerMode::Help;
+    }
+
+    pub(crate) fn exit_help_mode(&mut self) {
+        self.mode = PickerMode::Search;
+    }
+
+    pub(crate) fn help_mode_handle_event(&mut self, event: Event) -> EventResponse {
+        match event {
+            Event::Key(key) => match key.code {
+                KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char('h') => {
+                    if key.modifiers.contains(KeyModifiers::CONTROL)
+                        && key.code == KeyCode::Char('h')
+                    {
+                        self.exit_help_mode();
+                        EventResponse::UpdateUI
+                    } else if key.code == KeyCode::Esc || key.code == KeyCode::Char('q') {
+                        self.exit_help_mode();
+                        EventResponse::UpdateUI
+                    } else {
+                        EventResponse::NoAction
+                    }
+                }
+                KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                    EventResponse::ExitProgram
+                }
+                _ => EventResponse::NoAction,
+            },
+            _ => EventResponse::NoAction,
+        }
+    }
+
     pub fn run(&mut self) -> AppResult<SelectedItems<T>> {
         // Setup terminal
         enable_raw_mode()?;
@@ -243,6 +277,7 @@ where
         match self.mode {
             PickerMode::Search => self.search_mode_handle_event(event),
             PickerMode::Editing => self.editing_mode_handle_event(event),
+            PickerMode::Help => self.help_mode_handle_event(event),
         }
     }
 

@@ -13,58 +13,65 @@ pub fn ui<T>(f: &mut Frame, app: &mut Picker<T>)
 where
     T: Sync + Send + Display,
 {
-    if app.has_preview() {
-        // Split screen horizontally for preview mode
-        let main_chunks = Layout::default()
-            .direction(Direction::Horizontal)
-            .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
-            .split(f.area());
+    match app.mode {
+        crate::picker::PickerMode::Help => {
+            render_help_screen(f, f.area());
+        }
+        _ => {
+            if app.has_preview() {
+                // Split screen horizontally for preview mode
+                let main_chunks = Layout::default()
+                    .direction(Direction::Horizontal)
+                    .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+                    .split(f.area());
 
-        // Left side - normal picker interface
-        let left_chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints(
-                [
-                    Constraint::Length(1),
-                    Constraint::Length(3),
-                    Constraint::Min(1),
-                ]
-                .as_ref(),
-            )
-            .split(main_chunks[0]);
+                // Left side - normal picker interface
+                let left_chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .constraints(
+                        [
+                            Constraint::Length(1),
+                            Constraint::Length(3),
+                            Constraint::Min(1),
+                        ]
+                        .as_ref(),
+                    )
+                    .split(main_chunks[0]);
 
-        // update the height before rendering so this doesn't get out of sync
-        app.update_height(left_chunks[2].height - 3);
+                // update the height before rendering so this doesn't get out of sync
+                app.update_height(left_chunks[2].height - 3);
 
-        // render the sections of the display now that everything is setup and updated
-        render_help(f, left_chunks[0], app);
-        render_search_input(f, app, left_chunks[1]);
-        render_items(f, app, left_chunks[2]);
+                // render the sections of the display now that everything is setup and updated
+                render_help(f, left_chunks[0], app);
+                render_search_input(f, app, left_chunks[1]);
+                render_items(f, app, left_chunks[2]);
 
-        // Right side - preview
-        render_preview(f, app, main_chunks[1]);
-    } else {
-        // Normal full-screen mode
-        let chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints(
-                [
-                    Constraint::Length(1),
-                    Constraint::Length(3),
-                    Constraint::Min(1),
-                ]
-                .as_ref(),
-            )
-            .split(f.area());
+                // Right side - preview
+                render_preview(f, app, main_chunks[1]);
+            } else {
+                // Normal full-screen mode
+                let chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .constraints(
+                        [
+                            Constraint::Length(1),
+                            Constraint::Length(3),
+                            Constraint::Min(1),
+                        ]
+                        .as_ref(),
+                    )
+                    .split(f.area());
 
-        // update the height before rendering so this doesn't get out of sync
-        // TODO ensure that 3 is always correct or pull the correct value that takes terminal resizing into account
-        app.update_height(chunks[2].height - 3);
+                // update the height before rendering so this doesn't get out of sync
+                // TODO ensure that 3 is always correct or pull the correct value that takes terminal resizing into account
+                app.update_height(chunks[2].height - 3);
 
-        // render the sections of the display now that everything is setup and updated
-        render_help(f, chunks[0], app);
-        render_search_input(f, app, chunks[1]);
-        render_items(f, app, chunks[2]);
+                // render the sections of the display now that everything is setup and updated
+                render_help(f, chunks[0], app);
+                render_search_input(f, app, chunks[1]);
+                render_items(f, app, chunks[2]);
+            }
+        }
     }
 }
 
@@ -297,4 +304,83 @@ where
         .wrap(ratatui::widgets::Wrap { trim: false });
 
     f.render_widget(preview, area);
+}
+
+fn render_help_screen(f: &mut Frame, area: Rect) {
+    let help_text = vec![
+        Line::from(vec![Span::styled(
+            "Picleo Help",
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Yellow),
+        )]),
+        Line::from(""),
+        Line::from(vec![Span::styled(
+            "Search Mode:",
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Green),
+        )]),
+        Line::from("  ↑/↓, PgUp/PgDn, Home/End  Navigate items"),
+        Line::from("  Tab                       Toggle item selection"),
+        Line::from("  Enter                     Confirm selection and exit"),
+        Line::from("  Esc                       Clear query or exit"),
+        Line::from("  Ctrl+c                    Exit program"),
+        Line::from("  Ctrl+u                    Clear query"),
+        Line::from("  Ctrl+a/e                  Move to start/end of query"),
+        Line::from("  Ctrl+k                    Delete to end of query"),
+        Line::from("  Ctrl+Backspace/Alt+Backspace  Delete word backward"),
+        Line::from("  Ctrl+Delete/Alt+Delete    Delete word forward"),
+        Line::from("  Ctrl+Left/Right           Jump word backward/forward"),
+        Line::from("  Ctrl+d                    Edit current item (if editable)"),
+        Line::from("  Ctrl+n                    Create new item (if editable)"),
+        Line::from("  Ctrl+h                    Show this help"),
+        Line::from(""),
+        Line::from(vec![Span::styled(
+            "Editing Mode:",
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Green),
+        )]),
+        Line::from("  ↑/↓                       Navigate autocomplete suggestions"),
+        Line::from("  Tab                       Toggle autocomplete selection"),
+        Line::from("  Enter                     Create items and return to search"),
+        Line::from("  Esc                       Cancel editing and return to search"),
+        Line::from("  Ctrl+c                    Exit program"),
+        Line::from("  Ctrl+u                    Clear editing text"),
+        Line::from("  Ctrl+a/e                  Move to start/end of text"),
+        Line::from("  Ctrl+k                    Delete to end of line"),
+        Line::from("  Ctrl+Backspace/Shift+Backspace  Delete word backward"),
+        Line::from("  Ctrl+Delete/Shift+Delete  Delete word forward"),
+        Line::from("  Ctrl+Left/Right           Jump word backward/forward"),
+        Line::from("  Ctrl+h                    Show this help"),
+        Line::from(""),
+        Line::from(vec![Span::styled(
+            "Mouse Support:",
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Green),
+        )]),
+        Line::from("  Scroll                    Navigate items"),
+        Line::from("  Shift/Ctrl+Scroll         Page navigation"),
+        Line::from("  Left Click                Toggle item selection"),
+        Line::from("  Middle Click              Toggle current item selection"),
+        Line::from(""),
+        Line::from(vec![
+            Span::styled("Press ", Style::default()),
+            Span::styled("Esc", Style::default().add_modifier(Modifier::BOLD)),
+            Span::styled(", ", Style::default()),
+            Span::styled("q", Style::default().add_modifier(Modifier::BOLD)),
+            Span::styled(", or ", Style::default()),
+            Span::styled("Ctrl+h", Style::default().add_modifier(Modifier::BOLD)),
+            Span::styled(" to close this help", Style::default()),
+        ]),
+    ];
+
+    let help_paragraph = Paragraph::new(help_text)
+        .block(Block::default().borders(Borders::ALL).title("Help"))
+        .alignment(Alignment::Left)
+        .wrap(ratatui::widgets::Wrap { trim: false });
+
+    f.render_widget(help_paragraph, area);
 }

@@ -120,6 +120,9 @@ where
                             event_response = EventResponse::NoAction;
                         }
                     }
+                    (KeyCode::Char('h'), KeyModifiers::CONTROL) => {
+                        self.enter_help_mode();
+                    }
 
                     // ignore other key codes
                     _ => {

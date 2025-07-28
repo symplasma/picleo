@@ -116,6 +116,10 @@ where
                     EventResponse::UpdateUI
                 }
                 (KeyCode::Char('c'), KeyModifiers::CONTROL) => EventResponse::ExitProgram,
+                (KeyCode::Char('h'), KeyModifiers::CONTROL) => {
+                    self.enter_help_mode();
+                    EventResponse::UpdateUI
+                }
                 _ => EventResponse::NoAction,
             },
 
