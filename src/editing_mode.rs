@@ -17,11 +17,13 @@ where
                 | (KeyCode::Char(ch), KeyModifiers::SHIFT) => {
                     self.append_to_editing_text(ch);
                     self.editing_index = self.editing_index.saturating_add(1);
+                    self.update_autocomplete_suggestions();
                     EventResponse::UpdateUI
                 }
                 (KeyCode::Backspace, KeyModifiers::NONE) => {
                     self.delete_from_editing_text();
                     self.editing_index = self.editing_index.saturating_sub(1);
+                    self.update_autocomplete_suggestions();
                     EventResponse::UpdateUI
                 }
                 (KeyCode::Right, KeyModifiers::NONE) => {
@@ -44,10 +46,31 @@ where
                 }
                 (KeyCode::Char('u'), KeyModifiers::CONTROL) => {
                     self.clear_editing_text();
+                    self.update_autocomplete_suggestions();
                     EventResponse::UpdateUI
                 }
                 (KeyCode::Enter, KeyModifiers::NONE) => {
                     self.create_item_from_editing_text();
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Up, KeyModifiers::NONE) => {
+                    if !self.autocomplete_suggestions.is_empty() {
+                        self.autocomplete_index = self.autocomplete_index.saturating_sub(1);
+                    }
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Down, KeyModifiers::NONE) => {
+                    if !self.autocomplete_suggestions.is_empty() {
+                        self.autocomplete_index = (self.autocomplete_index + 1).min(self.autocomplete_suggestions.len().saturating_sub(1));
+                    }
+                    EventResponse::UpdateUI
+                }
+                (KeyCode::Tab, KeyModifiers::NONE) => {
+                    if !self.autocomplete_suggestions.is_empty() && self.autocomplete_index < self.autocomplete_suggestions.len() {
+                        self.editing_text = self.autocomplete_suggestions[self.autocomplete_index].clone();
+                        self.editing_index = self.editing_text.len();
+                        self.update_autocomplete_suggestions();
+                    }
                     EventResponse::UpdateUI
                 }
                 (KeyCode::Esc, KeyModifiers::NONE) => {
@@ -81,6 +104,8 @@ where
     pub(crate) fn clear_editing_text(&mut self) {
         self.editing_text.clear();
         self.editing_index = 0;
+        self.autocomplete_suggestions.clear();
+        self.autocomplete_index = 0;
     }
 
     pub(crate) fn create_item_from_editing_text(&mut self) {

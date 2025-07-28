@@ -43,6 +43,9 @@ where
     pub preview_output: String,
     pub keep_colors: bool,
     pub editable: bool,
+    pub autocomplete: Option<Box<dyn Fn(&str) -> Vec<String> + Send + Sync>>,
+    pub autocomplete_suggestions: Vec<String>,
+    pub autocomplete_index: usize,
 }
 
 impl<T: Sync + Send + Display> Default for Picker<T> {
@@ -76,6 +79,9 @@ where
             preview_output: String::new(),
             keep_colors: false,
             editable,
+            autocomplete: None,
+            autocomplete_suggestions: Vec::new(),
+            autocomplete_index: 0,
         }
     }
 
@@ -157,6 +163,8 @@ where
         self.mode = PickerMode::Search;
         self.editing_text.clear();
         self.editing_index = 0;
+        self.autocomplete_suggestions.clear();
+        self.autocomplete_index = 0;
     }
 
     pub fn run(&mut self) -> AppResult<SelectedItems<T>> {
@@ -234,6 +242,20 @@ where
         match self.mode {
             PickerMode::Search => self.search_mode_handle_event(event),
             PickerMode::Editing => self.editing_mode_handle_event(event),
+        }
+    }
+
+    pub fn set_autocomplete<F>(&mut self, autocomplete: F)
+    where
+        F: Fn(&str) -> Vec<String> + Send + Sync + 'static,
+    {
+        self.autocomplete = Some(Box::new(autocomplete));
+    }
+
+    pub(crate) fn update_autocomplete_suggestions(&mut self) {
+        if let Some(ref autocomplete_fn) = self.autocomplete {
+            self.autocomplete_suggestions = autocomplete_fn(&self.editing_text);
+            self.autocomplete_index = 0;
         }
     }
 }
