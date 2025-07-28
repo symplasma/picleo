@@ -165,7 +165,9 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
                                             true => {
                                                 let mut parent_path = dir.clone();
                                                 parent_path.push(e.file_name());
-                                                Some(parent_path.to_string_lossy().to_string())
+                                                Some(SelectableItem::new_requested(
+                                                    parent_path.to_string_lossy().to_string(),
+                                                ))
                                             }
                                             false => None,
                                         }
