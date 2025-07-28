@@ -5,6 +5,61 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.9 (2025-07-28)
+
+### Chore
+
+ - <csr-id-4dbec3d06e22990cc79c5e4906ac7d79306795fc/> Fix mis-match
+
+### New Features
+
+ - <csr-id-f68c68be7a4f1ccc9a83ad65633e0c8ddc310404/> Clean up selection logic
+ - <csr-id-5161702cbd8b9a699e0c1ea9babda21033f22986/> apply search mode selection styling to autocomplete suggestions
+ - <csr-id-6b659efd1db5c637764c9186ce50793bc1a3dbd6/> implement tab selection and multi-item entry in editing mode
+ - <csr-id-cad6e0bce33c061f415fa3761c1bbd1930dfb708/> add advanced key bindings for editing mode
+ - <csr-id-8a1efb59e0dec98de8ae1fe7903cfa5e8d3bc966/> implement `Extend` trait for `RequestedItems`
+ - <csr-id-b8598087806c691218d7d411b93d5179aa094b68/> implement `Index` trait for `RequestedItems`
+ - <csr-id-1ac60093d12b987a65165a0be1b6830e91983273/> add RequestedItems struct as a wrapper for SelectableItem vector
+ - <csr-id-ce2ccc5128cb8e2a87d2cdabaa6f25039f74f88f/> create requested_items.rs module
+ - <csr-id-d7e852b75141bbc9094b036ce5e8641d462d5caa/> Add an example implementation
+ - <csr-id-94d8f9fc94cd810e69779999f2b4a1018c4614f2/> add optional autocomplete functionality to picker
+
+### Bug Fixes
+
+ - <csr-id-f9e8c9a43dcf03be013f43b6837d5b8251d00bc4/> Improve text navigation and editing
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 14 commits contributed to the release.
+ - 2 days passed between releases.
+ - 12 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Clean up selection logic ([`f68c68b`](https://github.com/symplasma/picleo/commit/f68c68be7a4f1ccc9a83ad65633e0c8ddc310404))
+    - Apply search mode selection styling to autocomplete suggestions ([`5161702`](https://github.com/symplasma/picleo/commit/5161702cbd8b9a699e0c1ea9babda21033f22986))
+    - Implement tab selection and multi-item entry in editing mode ([`6b659ef`](https://github.com/symplasma/picleo/commit/6b659efd1db5c637764c9186ce50793bc1a3dbd6))
+    - Improve text navigation and editing ([`f9e8c9a`](https://github.com/symplasma/picleo/commit/f9e8c9a43dcf03be013f43b6837d5b8251d00bc4))
+    - Add advanced key bindings for editing mode ([`cad6e0b`](https://github.com/symplasma/picleo/commit/cad6e0bce33c061f415fa3761c1bbd1930dfb708))
+    - Fix mis-match ([`4dbec3d`](https://github.com/symplasma/picleo/commit/4dbec3d06e22990cc79c5e4906ac7d79306795fc))
+    - Implement `Extend` trait for `RequestedItems` ([`8a1efb5`](https://github.com/symplasma/picleo/commit/8a1efb59e0dec98de8ae1fe7903cfa5e8d3bc966))
+    - Switch to RequestedItems for autocomplete ([`c994b8e`](https://github.com/symplasma/picleo/commit/c994b8e1760f79c647d821d466b062f0a04f2640))
+    - Implement `Index` trait for `RequestedItems` ([`b859808`](https://github.com/symplasma/picleo/commit/b8598087806c691218d7d411b93d5179aa094b68))
+    - Add RequestedItems struct as a wrapper for SelectableItem vector ([`1ac6009`](https://github.com/symplasma/picleo/commit/1ac60093d12b987a65165a0be1b6830e91983273))
+    - Create requested_items.rs module ([`ce2ccc5`](https://github.com/symplasma/picleo/commit/ce2ccc5128cb8e2a87d2cdabaa6f25039f74f88f))
+    - Add an example implementation ([`d7e852b`](https://github.com/symplasma/picleo/commit/d7e852b75141bbc9094b036ce5e8641d462d5caa))
+    - Add corrected design doc ([`47932fe`](https://github.com/symplasma/picleo/commit/47932feece31b1e890c2db71a41af2f49af72dfa))
+    - Add optional autocomplete functionality to picker ([`94d8f9f`](https://github.com/symplasma/picleo/commit/94d8f9fc94cd810e69779999f2b4a1018c4614f2))
+</details>
+
 ## v0.1.8 (2025-07-26)
 
 ### Documentation
@@ -20,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 3 commits contributed to the release.
+ - 4 commits contributed to the release.
  - 1 day passed between releases.
  - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
@@ -32,6 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release picleo v0.1.8 ([`5f77cea`](https://github.com/symplasma/picleo/commit/5f77cead9325d4ea0c9001c98627a1784858e866))
     - Add `editable` flag to control edit mode in Picker ([`843d3a8`](https://github.com/symplasma/picleo/commit/843d3a855031648dce27dea1771ad75e1cadf2a8))
     - Add `--keep-colors` CLI flag to control ANSI color rendering in preview ([`22c4522`](https://github.com/symplasma/picleo/commit/22c452214e3b16c644e6212aa5113231b2489819))
     - Add TODO and autocomplete ([`7914b0c`](https://github.com/symplasma/picleo/commit/7914b0c8069095e5c1aa08ced2fec0c4ba2beb99))
