@@ -181,6 +181,22 @@ where
         self.help_scroll_offset = 0;
     }
 
+    fn max_help_scroll_offset(&self) -> u16 {
+        // Help content has approximately 38 lines (counted from render_help_screen)
+        const HELP_CONTENT_LINES: u16 = 38;
+        
+        // Account for borders (2 lines) in the help screen
+        let available_height = self.height.saturating_sub(2);
+        
+        // Ensure we can't scroll so far that the screen becomes blank
+        // Keep at least one screenful visible
+        if HELP_CONTENT_LINES > available_height {
+            HELP_CONTENT_LINES.saturating_sub(available_height)
+        } else {
+            0
+        }
+    }
+
     pub(crate) fn help_mode_handle_event(&mut self, event: Event) -> EventResponse {
         match event {
             Event::Key(key) => match key.code {
@@ -205,7 +221,8 @@ where
                     EventResponse::UpdateUI
                 }
                 KeyCode::Down | KeyCode::Char('j') => {
-                    self.help_scroll_offset = self.help_scroll_offset.saturating_add(1);
+                    let max_offset = self.max_help_scroll_offset();
+                    self.help_scroll_offset = (self.help_scroll_offset.saturating_add(1)).min(max_offset);
                     EventResponse::UpdateUI
                 }
                 KeyCode::PageUp => {
@@ -213,7 +230,8 @@ where
                     EventResponse::UpdateUI
                 }
                 KeyCode::PageDown => {
-                    self.help_scroll_offset = self.help_scroll_offset.saturating_add(10);
+                    let max_offset = self.max_help_scroll_offset();
+                    self.help_scroll_offset = (self.help_scroll_offset.saturating_add(10)).min(max_offset);
                     EventResponse::UpdateUI
                 }
                 KeyCode::Home => {
@@ -221,8 +239,7 @@ where
                     EventResponse::UpdateUI
                 }
                 KeyCode::End => {
-                    // Set to a large value, the UI will constrain it appropriately
-                    self.help_scroll_offset = 1000;
+                    self.help_scroll_offset = self.max_help_scroll_offset();
                     EventResponse::UpdateUI
                 }
                 _ => EventResponse::NoAction,
@@ -233,7 +250,8 @@ where
                     EventResponse::UpdateUI
                 }
                 crossterm::event::MouseEventKind::ScrollDown => {
-                    self.help_scroll_offset = self.help_scroll_offset.saturating_add(3);
+                    let max_offset = self.max_help_scroll_offset();
+                    self.help_scroll_offset = (self.help_scroll_offset.saturating_add(3)).min(max_offset);
                     EventResponse::UpdateUI
                 }
                 _ => EventResponse::NoAction,
