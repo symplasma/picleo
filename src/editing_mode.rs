@@ -104,6 +104,10 @@ where
                     {
                         // Toggle the selection state of the current autocomplete item
                         self.autocomplete_suggestions[self.autocomplete_index].toggle_selected();
+
+                        // move selection down
+                        self.autocomplete_index = (self.autocomplete_index + 1)
+                            .min(self.autocomplete_suggestions.len().saturating_sub(1));
                     }
                     EventResponse::UpdateUI
                 }
@@ -143,15 +147,8 @@ where
     }
 
     pub(crate) fn create_items_from_editing_mode(&mut self) {
+        let mut item_count: usize = 0;
         let injector = self.matcher.injector();
-
-        // Add the current editing text if it's not empty
-        if !self.editing_text.is_empty() {
-            let new_item = SelectableItem::new_requested_selected(self.editing_text.clone());
-            injector.push(new_item, |item, columns| {
-                columns[0] = item.to_string().into()
-            });
-        }
 
         // Add all selected autocomplete suggestions
         for suggestion in &self.autocomplete_suggestions {
@@ -160,20 +157,18 @@ where
                 injector.push(new_item, |item, columns| {
                     columns[0] = item.to_string().into()
                 });
+                item_count += 1;
             }
         }
 
-        self.exit_editing_mode();
-    }
-
-    pub(crate) fn create_item_from_editing_text(&mut self) {
-        if !self.editing_text.is_empty() {
+        // Add the current editing text if it's not empty and no suggestions were selected
+        if item_count < 1 && !self.editing_text.is_empty() {
             let new_item = SelectableItem::new_requested_selected(self.editing_text.clone());
-            let injector = self.matcher.injector();
             injector.push(new_item, |item, columns| {
                 columns[0] = item.to_string().into()
             });
         }
+
         self.exit_editing_mode();
     }
 
