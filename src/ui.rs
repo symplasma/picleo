@@ -232,7 +232,21 @@ where
         let items: Vec<ListItem> = app
             .autocomplete_suggestions
             .iter()
-            .map(|suggestion| ListItem::new(suggestion.to_string()))
+            .map(|suggestion| {
+                let is_selected = suggestion.is_selected();
+                let style = if is_selected {
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD)
+                } else {
+                    Style::default()
+                };
+
+                let prefix = if is_selected { "✓ " } else { "  " };
+                let content = format!("{}{}", prefix, suggestion);
+
+                ListItem::new(content).style(style)
+            })
             .collect();
 
         let items = List::new(items)
