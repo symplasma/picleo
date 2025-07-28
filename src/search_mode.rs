@@ -684,8 +684,8 @@ where
                             }
 
                             // clean ANSI escapes via the `eunicode` crate, optionally keep colors
-                            let raw_bytes =
-                                RawBytes::from_bytes(preview_bytes).strip_ansi_escapes(self.keep_colors);
+                            let raw_bytes = RawBytes::from_bytes(preview_bytes)
+                                .strip_ansi_escapes(self.keep_colors);
                             // clean sketchy unicode codepoints
                             self.preview_output =
                                 UnicodeString::new(raw_bytes).clean().into_string();

@@ -1,6 +1,5 @@
-
-use std::ops::Index;
 use crate::selectable::SelectableItem;
+use std::ops::Index;
 
 /// A collection of requested items that acts as a wrapper around a Vec<SelectableItem<T>>
 pub struct RequestedItems<T> {

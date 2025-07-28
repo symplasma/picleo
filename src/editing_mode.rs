@@ -82,7 +82,7 @@ where
                     EventResponse::UpdateUI
                 }
                 (KeyCode::Enter, KeyModifiers::NONE) => {
-                    self.create_item_from_editing_text();
+                    self.create_items_from_editing_mode();
                     EventResponse::UpdateUI
                 }
                 (KeyCode::Up, KeyModifiers::NONE) => {
@@ -102,11 +102,8 @@ where
                     if !self.autocomplete_suggestions.is_empty()
                         && self.autocomplete_index < self.autocomplete_suggestions.len()
                     {
-                        self.editing_text = self.autocomplete_suggestions[self.autocomplete_index]
-                            .to_string()
-                            .clone();
-                        self.editing_index = self.editing_text.len();
-                        self.update_autocomplete_suggestions();
+                        // Toggle the selection state of the current autocomplete item
+                        self.autocomplete_suggestions[self.autocomplete_index].toggle_selected();
                     }
                     EventResponse::UpdateUI
                 }
@@ -143,6 +140,30 @@ where
         self.editing_index = 0;
         self.autocomplete_suggestions.clear();
         self.autocomplete_index = 0;
+    }
+
+    pub(crate) fn create_items_from_editing_mode(&mut self) {
+        let injector = self.matcher.injector();
+
+        // Add the current editing text if it's not empty
+        if !self.editing_text.is_empty() {
+            let new_item = SelectableItem::new_requested_selected(self.editing_text.clone());
+            injector.push(new_item, |item, columns| {
+                columns[0] = item.to_string().into()
+            });
+        }
+
+        // Add all selected autocomplete suggestions
+        for suggestion in &self.autocomplete_suggestions {
+            if suggestion.is_selected() {
+                let new_item = SelectableItem::new_requested_selected(suggestion.to_string());
+                injector.push(new_item, |item, columns| {
+                    columns[0] = item.to_string().into()
+                });
+            }
+        }
+
+        self.exit_editing_mode();
     }
 
     pub(crate) fn create_item_from_editing_text(&mut self) {
