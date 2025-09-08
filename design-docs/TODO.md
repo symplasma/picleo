@@ -2,11 +2,18 @@
 
 - [ ] Need to ensure that we restore the normal screen before printing error messages on panic
 - [ ] Add help command to remind users of available options in both search and editing mode
+- [ ] Add default prefix to be used with/instead of autocomplete
+- [ ] Allow non-prefixed output? Maybe this should be a flag or just allow it if the prefix is not set.
+- [ ] When finishing editing, take the version with the prefix
+- [ ] Make all selected matches sort to the top of the results...unless there are too many?
 - [ ] Need to ensure that lines do not mess up display via multi-width chars or other odd bytes e.g. when asked to take the head of binary files
 - [ ] Ensure that displayed lines fit within the space alloted
 - [ ] Limit the amount of data read from commands to about what fits in the preview area
 - [ ] Provide preview command variables e.g. &LINES
+- [ ] Make preview command execution async
+  - [ ] Cache command output for a few seconds so rapidly moving arrows up or down does not re-run commands unnecessarily
 - [ ] Allow preview commands to interrogate the terminal to get proper size and width
+- [ ] Add flag to run command in shell and respect shell functions and aliases if possible
 - [ ] Update match as indexing completes
 - [ ] Make autocomplete in editing mode case insensitive, or allow toggling
 - [ ] Allow editing of the preview command without restarting picleo
