@@ -162,6 +162,7 @@ where
         self.matcher.snapshot()
     }
 
+    // TODO add a closure that is provided the current item and must return the initial editing text
     pub(crate) fn enter_editing_mode(&mut self, item_text: String) {
         self.mode = PickerMode::Editing;
         self.editing_text = item_text;
