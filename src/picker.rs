@@ -3,10 +3,11 @@ use crate::{config::Config, selectable::SelectableItem, selected_items::Selected
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers},
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
 use nucleo::{Config as NucleoConfig, Injector, Nucleo, Snapshot};
-use ratatui::{prelude::CrosstermBackend, Terminal};
+use ratatui::prelude::Backend;
+use ratatui::{Terminal, prelude::CrosstermBackend};
 use std::time::Instant;
 use std::{error, fmt::Display, io, sync::Arc, thread::JoinHandle, time::Duration};
 
@@ -309,7 +310,10 @@ where
     pub(crate) fn run_loop<B: ratatui::backend::Backend>(
         &mut self,
         terminal: &mut Terminal<B>,
-    ) -> AppResult<SelectedItems<T>> {
+    ) -> AppResult<SelectedItems<T>>
+    where
+        <B as Backend>::Error: 'static,
+    {
         // setting this to true initially to trigger the initial screen paint
         let mut redraw_requested = true;
 
