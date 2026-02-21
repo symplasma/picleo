@@ -1,7 +1,7 @@
 [package]
 name = "picleo"
 version = "0.1.10"
-edition = "2021"
+edition = "2024"
 license = "BSD-3-Clause"                                                                                              # https://spdx.org/licenses/
 authors = ["Elio Grieco <grieco@egx.com>"]
 description = "A fuzzy picker similar to fzf and Skim using the Nucleo library. Can be used via CLI or as a library."
