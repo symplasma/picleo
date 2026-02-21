@@ -30,6 +30,13 @@ This is a mix of feature list and roadmap. Checked features are present in the c
 - [x] Click on items to toggle item selection
 - [ ] Running commands on selected entries
 - [ ] Support config via args and file
+- [ ] Add interactive modification of config options
+  - [ ] displaying ASCII colors
+  - [ ] column delimiters
+  - [ ] columns to display
+  - [ ] columns to output
+  - [ ] post-processing commands for existing items
+  - [ ] post-processing commands for requested items
 - [ ] Builder pattern for config when used as a library
 - [ ] Allows custom sorting and re-sorting of items
 - [ ] Customizable headers and header lines
