@@ -21,23 +21,23 @@ This is a mix of feature list and roadmap. Checked features are present in the c
 - [x] List directory contents, with recursive option
 - [x] List file contents
 - [x] Preview command functionality
-- [ ] Running commands on selected entries
-- [ ] Support config via args and file
-- [ ] Builder pattern for config when used as a library
-- [ ] Allows custom sorting and re-sorting of items
 - [x] Allows for the creation of new items not originally in the input
-- [ ] Customizable headers and header lines
-- [ ] Support multi-column chooser with column naming
-- [ ] Choose columns to display with delimiter pattern
-- [ ] Choose columns to output with join string
-- [ ] Support prefix based filters and args e.g. `title:`
-- [ ] Has filtering options for fields besides those shown and fuzzy matched against
 - [x] Is fast for large numbers of items
 - [x] Allows the core functionality to be embedded in other software as a library
 - [x] Can wrap arbitrary object types and return the whole objects after matches
 - [x] Supports mouse scroll wheel
 - [x] Middle-click to toggle item selection
 - [x] Click on items to toggle item selection
+- [ ] Running commands on selected entries
+- [ ] Support config via args and file
+- [ ] Builder pattern for config when used as a library
+- [ ] Allows custom sorting and re-sorting of items
+- [ ] Customizable headers and header lines
+- [ ] Support multi-column chooser with column naming
+- [ ] Choose columns to display with delimiter pattern
+- [ ] Choose columns to output with join string
+- [ ] Support prefix based filters and args e.g. `title:`
+- [ ] Has filtering options for fields besides those shown and fuzzy matched against
 
 Due to the excellent design of [nucleo](https://docs.rs/nucleo/latest/nucleo/) we are able to load matches in separate threads while the user starts searching. Currently, the `--threaded` option controls whether we perform item loads in separate threads. Only one thread is used to load arguments from `STDIN` while one thread per arg is used when passing file path arguments.
 
