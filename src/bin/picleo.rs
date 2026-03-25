@@ -8,27 +8,172 @@ use std::{
     io::{self, BufRead},
     path::{Path, PathBuf},
 };
+use std::collections::HashMap;
 
-// Wrapper for PathBuf that implements Display
+// Wrapper for PathBuf that stores both full path and display string
 #[derive(Debug, Clone)]
-struct DisplayPath(PathBuf);
+struct DisplayPath {
+    full_path: PathBuf,
+    display_name: String,
+}
+
+impl DisplayPath {
+    fn new(full_path: PathBuf, display_name: String) -> Self {
+        Self {
+            full_path,
+            display_name,
+        }
+    }
+
+    fn simple(path: PathBuf) -> Self {
+        let display_name = path.display().to_string();
+        Self {
+            full_path: path,
+            display_name,
+        }
+    }
+}
 
 impl fmt::Display for DisplayPath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0.display())
+        write!(f, "{}", self.display_name)
     }
 }
 
 impl From<PathBuf> for DisplayPath {
     fn from(path: PathBuf) -> Self {
-        DisplayPath(path)
+        DisplayPath::simple(path)
     }
 }
 
 impl AsRef<PathBuf> for DisplayPath {
     fn as_ref(&self) -> &PathBuf {
-        &self.0
+        &self.full_path
     }
+}
+
+/// Find the longest common path prefix among a list of paths
+fn find_common_prefix(paths: &[PathBuf]) -> PathBuf {
+    if paths.is_empty() {
+        return PathBuf::new();
+    }
+    if paths.len() == 1 {
+        // For a single path, return its parent directory
+        return paths[0].parent().map(|p| p.to_path_buf()).unwrap_or_default();
+    }
+
+    let mut common_components: Vec<_> = paths[0].components().collect();
+
+    for path in paths.iter().skip(1) {
+        let path_components: Vec<_> = path.components().collect();
+        let mut new_common = Vec::new();
+
+        for (a, b) in common_components.iter().zip(path_components.iter()) {
+            if a == b {
+                new_common.push(*a);
+            } else {
+                break;
+            }
+        }
+        common_components = new_common;
+    }
+
+    common_components.iter().collect()
+}
+
+/// Compute minimal unique display names for paths by removing common prefix
+/// but keeping enough path components to make names unambiguous
+fn compute_display_names(paths: &[PathBuf]) -> Vec<(PathBuf, String)> {
+    if paths.is_empty() {
+        return Vec::new();
+    }
+
+    let common_prefix = find_common_prefix(paths);
+    let prefix_len = common_prefix.components().count();
+
+    // First pass: strip common prefix from all paths
+    let mut stripped: Vec<(PathBuf, Vec<String>)> = paths
+        .iter()
+        .map(|p| {
+            let components: Vec<String> = p
+                .components()
+                .skip(prefix_len)
+                .map(|c| c.as_os_str().to_string_lossy().to_string())
+                .collect();
+            (p.clone(), components)
+        })
+        .collect();
+
+    // Check for ambiguity: if multiple paths have the same file name,
+    // we need to include more path components
+    let mut result: Vec<(PathBuf, String)> = Vec::with_capacity(paths.len());
+
+    // Group by file name to detect ambiguity
+    let mut name_counts: HashMap<String, usize> = HashMap::new();
+    for (_, components) in &stripped {
+        if let Some(name) = components.last() {
+            *name_counts.entry(name.clone()).or_insert(0) += 1;
+        }
+    }
+
+    for (full_path, components) in stripped.drain(..) {
+        if components.is_empty() {
+            result.push((full_path.clone(), full_path.display().to_string()));
+            continue;
+        }
+
+        let file_name = components.last().unwrap().clone();
+        let is_ambiguous = name_counts.get(&file_name).map(|&c| c > 1).unwrap_or(false);
+
+        let display_name = if is_ambiguous && components.len() > 1 {
+            // Include parent directory to disambiguate
+            // Find minimum components needed for uniqueness
+            let mut needed_components = 1;
+            'outer: for n in 2..=components.len() {
+                let suffix: Vec<_> = components.iter().skip(components.len() - n).collect();
+                let suffix_str: String = suffix.iter().map(|s| s.as_str()).collect::<Vec<_>>().join("/");
+
+                // Check if this suffix is unique among all paths
+                let mut count = 0;
+                for (_, other_components) in paths.iter().zip(
+                    paths.iter().map(|p| {
+                        p.components()
+                            .skip(prefix_len)
+                            .map(|c| c.as_os_str().to_string_lossy().to_string())
+                            .collect::<Vec<_>>()
+                    }),
+                ) {
+                    if other_components.len() >= n {
+                        let other_suffix: String = other_components
+                            .iter()
+                            .skip(other_components.len() - n)
+                            .map(|s| s.as_str())
+                            .collect::<Vec<_>>()
+                            .join("/");
+                        if other_suffix == suffix_str {
+                            count += 1;
+                        }
+                    }
+                }
+                if count == 1 {
+                    needed_components = n;
+                    break 'outer;
+                }
+            }
+            components
+                .iter()
+                .skip(components.len().saturating_sub(needed_components))
+                .map(|s| s.as_str())
+                .collect::<Vec<_>>()
+                .join("/")
+        } else {
+            components.join("/")
+        };
+
+        result.push((full_path, display_name));
+    }
+
+    result
 }
 
 #[derive(Parser, Debug)]
@@ -185,43 +330,64 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
             suggestions
         });
 
+        // Collect all file paths first to compute common prefix
+        let mut all_paths: Vec<PathBuf> = Vec::new();
+        for path in &dirs {
+            if path.is_file() {
+                let abs_path = fs::canonicalize(path).unwrap_or_else(|_| path.clone());
+                all_paths.push(abs_path);
+            } else if path.is_dir() {
+                collect_paths_from_dir(path, args.recursive, &mut all_paths);
+            }
+        }
+
+        // Compute display names with common prefix removed
+        let display_names = compute_display_names(&all_paths);
+
+        // Create a map from full path to display name for quick lookup
+        let path_to_display: HashMap<PathBuf, String> = display_names.into_iter().collect();
+
+        // Inject items with computed display names
         for path in dirs {
             if path.is_file() {
-                // Add the file itself to the picker
+                let abs_path = fs::canonicalize(&path).unwrap_or_else(|_| path.clone());
+                let display_name = path_to_display
+                    .get(&abs_path)
+                    .cloned()
+                    .unwrap_or_else(|| abs_path.display().to_string());
+                let display_path = DisplayPath::new(abs_path, display_name);
+
                 if args.threaded {
                     picker.inject_items_threaded(move |i| {
-                        i.push(SelectableItem::new(DisplayPath(path)), |item, columns| {
+                        i.push(SelectableItem::new(display_path), |item, columns| {
                             columns[0] = item.to_string().into()
                         });
                     });
                 } else {
                     picker.inject_items(|i| {
-                        i.push(
-                            SelectableItem::new(DisplayPath(path.clone())),
-                            |item, columns| columns[0] = item.to_string().into(),
-                        );
+                        i.push(SelectableItem::new(display_path.clone()), |item, columns| {
+                            columns[0] = item.to_string().into()
+                        });
                     });
                 }
             } else if path.is_dir() {
-                // Handle directory as before
+                let path_to_display = path_to_display.clone();
+                let recursive = args.recursive;
+
                 if args.threaded {
                     picker.inject_items_threaded(move |i| {
-                        if args.recursive {
-                            // Recursively walk the directory
-                            walk_dir_recursive(path, i);
+                        if recursive {
+                            walk_dir_recursive_with_display(&path, i, &path_to_display);
                         } else {
-                            // Non-recursive: only list direct children
-                            walk_dir(path, i);
+                            walk_dir_with_display(&path, i, &path_to_display);
                         }
                     });
                 } else {
                     picker.inject_items(|i| {
-                        if args.recursive {
-                            // Recursively walk the directory
-                            walk_dir_recursive(path, i);
+                        if recursive {
+                            walk_dir_recursive_with_display(&path, i, &path_to_display);
                         } else {
-                            // Non-recursive: only list direct children
-                            walk_dir(path, i);
+                            walk_dir_with_display(&path, i, &path_to_display);
                         }
                     });
                 }
@@ -232,7 +398,8 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
         match picker.run() {
             Ok(selected_items) => {
                 for path in selected_items.existing_values() {
-                    println!("{}", path.0.display())
+                    // Print the full absolute path
+                    println!("{}", path.full_path.display())
                 }
                 for requested_path in selected_items.requested_values() {
                     println!("{}", requested_path)
@@ -295,25 +462,60 @@ fn load_from_stdin(args: Args) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-fn walk_dir(dir: PathBuf, i: &nucleo::Injector<SelectableItem<DisplayPath>>) {
-    if let Ok(entries) = fs::read_dir(&dir) {
+/// Collect all file paths from a directory (used for computing common prefix)
+fn collect_paths_from_dir(dir: &PathBuf, recursive: bool, paths: &mut Vec<PathBuf>) {
+    if let Ok(entries) = fs::read_dir(dir) {
         for entry in entries.flatten() {
             let path = entry.path();
-            i.push(SelectableItem::new(DisplayPath(path)), |item, columns| {
+            if path.is_dir() && recursive {
+                collect_paths_from_dir(&path, recursive, paths);
+            } else if path.is_file() {
+                let abs_path = fs::canonicalize(&path).unwrap_or_else(|_| path);
+                paths.push(abs_path);
+            }
+        }
+    }
+}
+
+fn walk_dir_with_display(
+    dir: &PathBuf,
+    i: &nucleo::Injector<SelectableItem<DisplayPath>>,
+    path_to_display: &HashMap<PathBuf, String>,
+) {
+    if let Ok(entries) = fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let abs_path = fs::canonicalize(&path).unwrap_or_else(|_| path);
+            let display_name = path_to_display
+                .get(&abs_path)
+                .cloned()
+                .unwrap_or_else(|| abs_path.display().to_string());
+            let display_path = DisplayPath::new(abs_path, display_name);
+            i.push(SelectableItem::new(display_path), |item, columns| {
                 columns[0] = item.to_string().into()
             });
         }
     }
 }
 
-fn walk_dir_recursive(dir: PathBuf, injector: &nucleo::Injector<SelectableItem<DisplayPath>>) {
+fn walk_dir_recursive_with_display(
+    dir: &PathBuf,
+    injector: &nucleo::Injector<SelectableItem<DisplayPath>>,
+    path_to_display: &HashMap<PathBuf, String>,
+) {
     if let Ok(entries) = fs::read_dir(dir) {
         for entry in entries.flatten() {
             let path = entry.path();
             if path.is_dir() {
-                walk_dir_recursive(path, injector);
+                walk_dir_recursive_with_display(&path, injector, path_to_display);
             } else {
-                injector.push(SelectableItem::new(DisplayPath(path)), |item, columns| {
+                let abs_path = fs::canonicalize(&path).unwrap_or_else(|_| path);
+                let display_name = path_to_display
+                    .get(&abs_path)
+                    .cloned()
+                    .unwrap_or_else(|| abs_path.display().to_string());
+                let display_path = DisplayPath::new(abs_path, display_name);
+                injector.push(SelectableItem::new(display_path), |item, columns| {
                     columns[0] = item.to_string().into()
                 });
             }
