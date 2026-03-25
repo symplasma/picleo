@@ -740,7 +740,7 @@ where
             .collect()
     }
 
-    pub(crate) fn selected_items(&self) -> SelectedItems<T> {
+    pub(crate) fn selected_items(&self) -> SelectedItems<'_, T> {
         // Get all selected items as references
         let selected_items: Vec<&SelectableItem<T>> = self
             .snapshot()

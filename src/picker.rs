@@ -284,7 +284,7 @@ where
         }
     }
 
-    pub fn run(&mut self) -> AppResult<SelectedItems<T>> {
+    pub fn run(&mut self) -> AppResult<SelectedItems<'_, T>> {
         // Setup terminal
         enable_raw_mode()?;
         // TODO should we allow the caller to pass any arbitrary stream?
@@ -310,7 +310,7 @@ where
     pub(crate) fn run_loop<B: ratatui::backend::Backend>(
         &mut self,
         terminal: &mut Terminal<B>,
-    ) -> AppResult<SelectedItems<T>>
+    ) -> AppResult<SelectedItems<'_, T>>
     where
         <B as Backend>::Error: 'static,
     {

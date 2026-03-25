@@ -33,12 +33,12 @@ impl<T> RequestedItems<T> {
     }
 
     /// Get an iterator over the items
-    pub fn iter(&self) -> std::slice::Iter<SelectableItem<T>> {
+    pub fn iter(&self) -> std::slice::Iter<'_, SelectableItem<T>> {
         self.items.iter()
     }
 
     /// Get a mutable iterator over the items
-    pub fn iter_mut(&mut self) -> std::slice::IterMut<SelectableItem<T>> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, SelectableItem<T>> {
         self.items.iter_mut()
     }
 
