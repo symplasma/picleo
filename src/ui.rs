@@ -185,9 +185,25 @@ where
                         };
 
                         let prefix = if is_selected { "✓ " } else { "  " };
-                        let content = format!("{}{}", prefix, item);
+                        let item_str = format!("{}", item);
 
-                        ListItem::new(content).style(style)
+                        // Parse ANSI codes in the item display for colored filenames
+                        let item_text = match item_str.as_str().into_text() {
+                            Ok(text) => text,
+                            Err(_) => Text::raw(item_str.clone()),
+                        };
+
+                        // Prepend the prefix to the first line
+                        let mut lines: Vec<Line> = item_text.lines.into_iter().collect();
+                        if let Some(first_line) = lines.first_mut() {
+                            let mut new_spans = vec![Span::raw(prefix)];
+                            new_spans.extend(first_line.spans.drain(..));
+                            first_line.spans = new_spans;
+                        } else {
+                            lines.push(Line::from(prefix));
+                        }
+
+                        ListItem::new(Text::from(lines)).style(style)
                     })
                     .collect();
 

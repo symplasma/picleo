@@ -15,34 +15,39 @@ use std::collections::HashMap;
 struct DisplayPath {
     full_path: PathBuf,
     display_name: String,
+    /// Index where the filename starts in display_name (for coloring)
+    filename_start: usize,
+    /// Whether to use colors when displaying
+    use_color: bool,
 }
 
 impl DisplayPath {
-    fn new(full_path: PathBuf, display_name: String) -> Self {
+    fn new(full_path: PathBuf, display_name: String, use_color: bool) -> Self {
+        // Find where the filename starts (after the last '/')
+        let filename_start = display_name.rfind('/').map(|i| i + 1).unwrap_or(0);
         Self {
             full_path,
             display_name,
+            filename_start,
+            use_color,
         }
     }
 
-    fn simple(path: PathBuf) -> Self {
+    fn simple(path: PathBuf, use_color: bool) -> Self {
         let display_name = path.display().to_string();
-        Self {
-            full_path: path,
-            display_name,
-        }
+        Self::new(path, display_name, use_color)
     }
 }
 
 impl fmt::Display for DisplayPath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.display_name)
-    }
-}
-
-impl From<PathBuf> for DisplayPath {
-    fn from(path: PathBuf) -> Self {
-        DisplayPath::simple(path)
+        if self.use_color && self.filename_start < self.display_name.len() {
+            let (dir_part, file_part) = self.display_name.split_at(self.filename_start);
+            // Use ANSI escape codes: cyan for filename
+            write!(f, "{}\x1b[36m{}\x1b[0m", dir_part, file_part)
+        } else {
+            write!(f, "{}", self.display_name)
+        }
     }
 }
 
@@ -198,6 +203,10 @@ struct Args {
     /// Keep ANSI color codes in preview output
     #[arg(long)]
     keep_colors: bool,
+
+    /// Disable colored output in the picker display
+    #[arg(long)]
+    no_color: bool,
 }
 
 fn main() -> Result<()> {
@@ -262,7 +271,7 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
     } else {
         // Has directories or mixed - use DisplayPath picker for file paths
         let mut picker = Picker::<DisplayPath>::new(true);
-        picker.set_keep_colors(args.keep_colors);
+        picker.set_keep_colors(args.keep_colors || !args.no_color);
         if let Some(preview_cmd) = preview_command {
             picker.set_preview_command(preview_cmd);
         }
@@ -347,6 +356,8 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
         // Create a map from full path to display name for quick lookup
         let path_to_display: HashMap<PathBuf, String> = display_names.into_iter().collect();
 
+        let use_color = !args.no_color;
+
         // Inject items with computed display names
         for path in dirs {
             if path.is_file() {
@@ -355,7 +366,7 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
                     .get(&abs_path)
                     .cloned()
                     .unwrap_or_else(|| abs_path.display().to_string());
-                let display_path = DisplayPath::new(abs_path, display_name);
+                let display_path = DisplayPath::new(abs_path, display_name, use_color);
 
                 if args.threaded {
                     picker.inject_items_threaded(move |i| {
@@ -377,17 +388,17 @@ fn load_from_args(args: Args) -> Result<(), anyhow::Error> {
                 if args.threaded {
                     picker.inject_items_threaded(move |i| {
                         if recursive {
-                            walk_dir_recursive_with_display(&path, i, &path_to_display);
+                            walk_dir_recursive_with_display(&path, i, &path_to_display, use_color);
                         } else {
-                            walk_dir_with_display(&path, i, &path_to_display);
+                            walk_dir_with_display(&path, i, &path_to_display, use_color);
                         }
                     });
                 } else {
                     picker.inject_items(|i| {
                         if recursive {
-                            walk_dir_recursive_with_display(&path, i, &path_to_display);
+                            walk_dir_recursive_with_display(&path, i, &path_to_display, use_color);
                         } else {
-                            walk_dir_with_display(&path, i, &path_to_display);
+                            walk_dir_with_display(&path, i, &path_to_display, use_color);
                         }
                     });
                 }
@@ -481,6 +492,7 @@ fn walk_dir_with_display(
     dir: &PathBuf,
     i: &nucleo::Injector<SelectableItem<DisplayPath>>,
     path_to_display: &HashMap<PathBuf, String>,
+    use_color: bool,
 ) {
     if let Ok(entries) = fs::read_dir(dir) {
         for entry in entries.flatten() {
@@ -490,7 +502,7 @@ fn walk_dir_with_display(
                 .get(&abs_path)
                 .cloned()
                 .unwrap_or_else(|| abs_path.display().to_string());
-            let display_path = DisplayPath::new(abs_path, display_name);
+            let display_path = DisplayPath::new(abs_path, display_name, use_color);
             i.push(SelectableItem::new(display_path), |item, columns| {
                 columns[0] = item.to_string().into()
             });
@@ -502,19 +514,20 @@ fn walk_dir_recursive_with_display(
     dir: &PathBuf,
     injector: &nucleo::Injector<SelectableItem<DisplayPath>>,
     path_to_display: &HashMap<PathBuf, String>,
+    use_color: bool,
 ) {
     if let Ok(entries) = fs::read_dir(dir) {
         for entry in entries.flatten() {
             let path = entry.path();
             if path.is_dir() {
-                walk_dir_recursive_with_display(&path, injector, path_to_display);
+                walk_dir_recursive_with_display(&path, injector, path_to_display, use_color);
             } else {
                 let abs_path = fs::canonicalize(&path).unwrap_or_else(|_| path);
                 let display_name = path_to_display
                     .get(&abs_path)
                     .cloned()
                     .unwrap_or_else(|| abs_path.display().to_string());
-                let display_path = DisplayPath::new(abs_path, display_name);
+                let display_path = DisplayPath::new(abs_path, display_name, use_color);
                 injector.push(SelectableItem::new(display_path), |item, columns| {
                     columns[0] = item.to_string().into()
                 });
