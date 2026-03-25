@@ -1,6 +1,6 @@
 [package]
 name = "picleo"
-version = "0.1.10"
+version = "0.1.11"
 edition = "2024"
 license = "BSD-3-Clause"                                                                                              # https://spdx.org/licenses/
 authors = ["Elio Grieco <grieco@egx.com>"]

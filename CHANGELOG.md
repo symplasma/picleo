@@ -5,7 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.11 (2026-03-25)
+
+### Chore
+
+ - <csr-id-542bdae2f0d8e42f3d55c525f494167f388cb08a/> Update to fix security issue
+
+### New Features
+
+ - <csr-id-bacdb03f7fa3a564b6438aef9f59c4a611f074f7/> add `--no-color` flag and color filename in picker display
+ - <csr-id-2a5ec7410d7add8a321a23e06d6d812547709eb4/> remove common path prefix from file listings
+
+### Bug Fixes
+
+ - <csr-id-5f24ad9a152979d116a9eddbcb234f02b187596e/> Cleanup cargo warnings
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 11 commits contributed to the release over the course of 198 calendar days.
+ - 240 days passed between releases.
+ - 4 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Add `--no-color` flag and color filename in picker display ([`bacdb03`](https://github.com/symplasma/picleo/commit/bacdb03f7fa3a564b6438aef9f59c4a611f074f7))
+    - Cleanup cargo warnings ([`5f24ad9`](https://github.com/symplasma/picleo/commit/5f24ad9a152979d116a9eddbcb234f02b187596e))
+    - Remove common path prefix from file listings ([`2a5ec74`](https://github.com/symplasma/picleo/commit/2a5ec7410d7add8a321a23e06d6d812547709eb4))
+    - Update to fix security issue ([`542bdae`](https://github.com/symplasma/picleo/commit/542bdae2f0d8e42f3d55c525f494167f388cb08a))
+    - Upgrade incompatible dependencies ([`0c12420`](https://github.com/symplasma/picleo/commit/0c124209578abafc928c5008aab7a50fa57d03f8))
+    - Update Rust edition ([`7eb650e`](https://github.com/symplasma/picleo/commit/7eb650e2920f61854967ac74d12b296424ec149c))
+    - Add interactive config feature ([`bdc0daa`](https://github.com/symplasma/picleo/commit/bdc0daaf39c535f216b7508d20d6f8c9b230c7c6))
+    - Move design TODOs into README ([`97254b5`](https://github.com/symplasma/picleo/commit/97254b5d6abe4347f5bb3e4ef9451fbed5f496d8))
+    - Reorganize features in README ([`fe95142`](https://github.com/symplasma/picleo/commit/fe951423e696b49538e416f3c7064586fe4b1094))
+    - Add TODO comment ([`7b759cf`](https://github.com/symplasma/picleo/commit/7b759cf96c5714243adb5b1a6f886ec5b134738c))
+    - Add todos ([`f2a55fe`](https://github.com/symplasma/picleo/commit/f2a55fe89287931533f03ddcf72415fe12266139))
+</details>
+
 ## v0.1.10 (2025-07-28)
+
+<csr-id-31255c613fc78d140c76bf32f1cc0b73d0e4c93f/>
 
 ### Documentation
 
@@ -33,7 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 10 commits contributed to the release.
+ - 11 commits contributed to the release.
  - 10 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -44,6 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release picleo v0.1.10 ([`e437aac`](https://github.com/symplasma/picleo/commit/e437aacd87d854301aab22544b8f708f5fc065bb))
     - Improve interframe delay handling ([`9d34395`](https://github.com/symplasma/picleo/commit/9d34395c982f23d56ea5c9a80721bc08fd890a47))
     - Format code ([`1df91a0`](https://github.com/symplasma/picleo/commit/1df91a06214197bc03187d276107592b9cc4b647))
     - Improve help screen scrolling on terminal resize ([`464d8ef`](https://github.com/symplasma/picleo/commit/464d8ef7ad93e091defb7f7e1576ea13c6a9c59f))
